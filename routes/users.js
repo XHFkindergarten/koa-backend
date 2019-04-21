@@ -44,8 +44,11 @@ router.post('/register', async ctx => {
   // 对输入注册信息进行表单校验
   const {errors,isValid} = await ValidateRegister(ctx.request.body)
   if(!isValid) {
-    ctx.status = 400
-    ctx.body = errors
+    ctx.status = 200
+    ctx.body = {
+      success: false,
+      errors
+    }
     return 
   }
 
@@ -61,8 +64,9 @@ router.post('/register', async ctx => {
   })
   const emailRes = await mysql.query(sqlEmail)
   if(emailRes.length!=0){
-    ctx.status = 400
+    ctx.status = 200
     ctx.body = {
+      success: false,
       msg: '该邮箱已注册'
     }
     return 
@@ -88,6 +92,7 @@ router.post('/register', async ctx => {
   if (res.affectedRows==1) {
     ctx.status = 200
     ctx.body = {
+      success: true,
       data: {
         username: SQLdata.params.name,
         avatar: SQLdata.params.avatar,
@@ -122,8 +127,9 @@ router.post('/login', async ctx => {
     }
   }))
   if (queryEmail.length==0) {
-    ctx.status = 400
+    ctx.status = 200
     ctx.body = {
+      success: false,
       msg: '该邮箱尚未注册'
     }
     return
@@ -148,7 +154,7 @@ router.post('/login', async ctx => {
       token: 'Bearer ' + token
     }
   } else {
-    ctx.status = 400
+    ctx.status = 200
     ctx.body = {
       success: false,
       msg: 'password wrong'
@@ -170,6 +176,48 @@ router.get('/current', passport.authenticate('jwt', {session:false}),
       username: ctx.state.user.name,
       avatar: ctx.state.user.avatar
     }
+})
+
+/**
+ * @router GET /users/role
+ * @description 根据用户id获取用户权限
+ * @access 接口是公开的
+ */
+router.get('/role', async ctx => {
+  console.log(ctx.request.query)
+  if(ctx.request.query.id) {
+    const mysql = new Mysql()
+    const queryRole = await mysql.query(SQL.query({
+      tableName: 'role',
+      params: {
+        userId: ctx.request.query.id
+      }
+    }))
+      .then(res => {
+        console.log(res)
+        if (res.length>0) {
+          let roles = []
+          res.forEach(r => {
+            roles.push(r.roleId)
+          });
+          console.log(roles)
+          ctx.status = 200
+          ctx.body = {
+            success: true,
+            msg: 'congratuations,get roleInfo success!',
+            data: roles
+          }
+        }else {
+          ctx.status = 200
+          ctx.body = {
+            success: true,
+            msg: 'this user got no role'
+          }
+        }
+      })
+  } else {
+    ctx.status = 400
+  }
 })
 
 

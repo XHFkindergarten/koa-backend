@@ -17,6 +17,11 @@
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
+drop database if exists koa;
+create database koa;
+use koa;
+
+
 -- ----------------------------
 -- Table structure for users
 -- ----------------------------

@@ -12,7 +12,8 @@ const passport = require('koa-passport')
 const Router = require('koa-router')
 const router = new Router()
 
-
+const KoaCors = require('koa-cors')
+app.use(KoaCors())
 
 
 
