@@ -18,8 +18,6 @@ module.exports = passport=>{
       new JwtStrategy(opts, async function(jwt_payload, done) {
       // 此时的jwt_payload是token被解析后得到的信息
       // console.log(jwt_payload)
-      
-      
       const user = await mysql.query(SQL.query({
         tableName: 'users',
         params: {

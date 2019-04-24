@@ -21,6 +21,8 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 // 引入鉴权工具 koa-passport
 const passport = require('koa-passport')
+// 引入邮件发送实例
+const transporter = require('../tool/sendmail')
 
 /**
  * @router GET /users defaultAPI
@@ -104,6 +106,57 @@ router.post('/register', async ctx => {
 })
 
 /**
+ * @router GET /users/sendemail
+ * @description 向注册邮箱发送验证邮件
+ * @access 接口是公开的
+ */
+router.get('/sendmail', async ctx => {
+  const code = Utils.randCode(6)
+  const mailOptions = {
+    ...config.emailInfo(code),
+    to: ctx.query.email
+  }
+  // 首先判断该邮箱是否注册过
+  const SQLdata = {
+    // 表名
+    tableName: 'users',
+    // 参数
+    params: {
+      email: ctx.query.email
+    }
+  }
+  const sql = SQL.query(SQLdata)
+  const mysql = new Mysql()
+  const res = await mysql.query(sql)
+  if (res.length>0) {
+    ctx.status = 200
+    ctx.body = {
+      success: false,
+      msg: '该邮箱已经注册'
+    }
+    return
+  }
+
+  console.log(mailOptions)
+  await transporter.sendMail(mailOptions, (err, info) => {
+    if(err) {
+      ctx.status = 200
+      ctx.body = {
+        success: false,
+        msg: '发送失败'
+      }
+      return
+    }
+  })
+  ctx.status = 200
+  ctx.body = {
+    code,
+    success: true,
+    msg: 'congratuations, send email success!'
+  }
+})
+
+/**
  * @router POST /users/login
  * @description 登录接口API
  * @param email password
@@ -145,7 +198,7 @@ router.post('/login', async ctx => {
     }
     // 生成token字符串
     const token = jwt.sign(payLoad,config.secureOrKey,{
-      expiresIn: 60*60 // token有效时间
+      expiresIn: 24*60*60 // token有效时间
     })
     ctx.status = 200
     ctx.body = {
