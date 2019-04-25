@@ -23,6 +23,12 @@ const jwt = require('jsonwebtoken')
 const passport = require('koa-passport')
 // 引入邮件发送实例
 const transporter = require('../tool/sendmail')
+// 引入nodejs的文件处理插件
+const fs = require('fs')
+// 引入path组件
+const path = require('path')
+// 引入图形处理插件gm
+const gm = require('gm').subClass({imageMagick: true})
 
 /**
  * @router GET /users defaultAPI
@@ -106,11 +112,52 @@ router.post('/register', async ctx => {
 })
 
 /**
+ * @router POST /users/avatar
+ * @description 上传用户头像
+ * @access 接口是公开的
+ */
+router.post('/avatar', async ctx => {
+  // 获取上传文件
+  const file = ctx.request.files.file
+  // 创建可读流
+  const reader = fs.createReadStream(file.path)
+  // 创建写入路径
+  let filePath = path.join(__dirname,'..', 'public/upload/avatar/') + `${file.name}`
+  console.log(filePath)
+  // 创建可写流
+  const upStream = fs.createWriteStream(filePath)
+  // 可读流通过管道写入可写流
+  reader.pipe(upStream)
+  let width,height
+  gm(filePath)
+    .identify(function(err, data) {
+      if(!err) {
+        const {width, height} = data.size
+        const side = Math.min(width, height)
+        console.log(side)
+        gm(filePath)
+          .resize(side, side,'!')
+          .noProfile()
+          .write(filePath, function(err){
+            if(!err){
+              ctx.status = 200
+              ctx.body = {
+                msg: 'success'
+              }
+            }
+          })
+      }
+    })
+  
+})
+
+/**
  * @router GET /users/sendemail
  * @description 向注册邮箱发送验证邮件
  * @access 接口是公开的
  */
 router.get('/sendmail', async ctx => {
+  console.log(process.env.NODE_ENV)
   const code = Utils.randCode(6)
   const mailOptions = {
     ...config.emailInfo(code),
