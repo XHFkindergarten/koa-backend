@@ -119,35 +119,51 @@ router.post('/register', async ctx => {
 router.post('/avatar', async ctx => {
   // 获取上传文件
   const file = ctx.request.files.file
+  console.log(file)
+  // 如果文件不是图片，返回错误
+  if (file.type!='image/jpeg' && file.type!='image/jpg' && file.type!='image/png') {
+    ctx.status = 200
+    ctx.body = {
+      success: false,
+      msg: '只允许上传图片'
+    }
+    return
+  }
   // 创建可读流
   const reader = fs.createReadStream(file.path)
   // 创建写入路径
-  let filePath = path.join(__dirname,'..', 'public/upload/avatar/') + `${file.name}`
+  let filePath = path.join(__dirname,'..', 'public/upload/avatar/') + `avatar${ctx.request.body.id}.${Utils.getFileType(file.name)}`
   console.log(filePath)
   // 创建可写流
   const upStream = fs.createWriteStream(filePath)
   // 可读流通过管道写入可写流
   reader.pipe(upStream)
-  let width,height
-  gm(filePath)
-    .identify(function(err, data) {
-      if(!err) {
-        const {width, height} = data.size
-        const side = Math.min(width, height)
-        console.log(side)
-        gm(filePath)
-          .resize(side, side,'!')
-          .noProfile()
-          .write(filePath, function(err){
-            if(!err){
-              ctx.status = 200
-              ctx.body = {
-                msg: 'success'
-              }
-            }
-          })
-      }
-    })
+  ctx.status = 200
+  ctx.body = {
+    success: true,
+    msg: 'congratuations,upload avatarImg success!',
+    imgpath: `http://${config.host}/upload/avatar/avatar${ctx.request.body.id}.${Utils.getFileType(file.name)}`
+  }
+  // 统一图片的长宽，挤成一个正方形
+  // let width,height
+  // gm(filePath)
+  //   .identify(function(err, data) {
+  //     if(!err) {
+  //       const {width, height} = data.size
+  //       const side = Math.min(width, height)
+  //       gm(filePath)
+  //         .resize(side, side,'!')
+  //         .noProfile()
+  //         .write(filePath, function(err){
+  //           if(!err){
+  //             ctx.status = 200
+  //             ctx.body = {
+  //               msg: 'success'
+  //             }
+  //           }
+  //         })
+  //     }
+  //   })
   
 })
 
@@ -157,7 +173,6 @@ router.post('/avatar', async ctx => {
  * @access 接口是公开的
  */
 router.get('/sendmail', async ctx => {
-  console.log(process.env.NODE_ENV)
   const code = Utils.randCode(6)
   const mailOptions = {
     ...config.emailInfo(code),
@@ -284,7 +299,6 @@ router.get('/current', passport.authenticate('jwt', {session:false}),
  * @access 接口是公开的
  */
 router.get('/role', async ctx => {
-  console.log(ctx.request.query)
   if(ctx.request.query.id) {
     const mysql = new Mysql()
     const queryRole = await mysql.query(SQL.query({
@@ -294,13 +308,11 @@ router.get('/role', async ctx => {
       }
     }))
       .then(res => {
-        console.log(res)
         if (res.length>0) {
           let roles = []
           res.forEach(r => {
             roles.push(r.roleId)
           });
-          console.log(roles)
           ctx.status = 200
           ctx.body = {
             success: true,

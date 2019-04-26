@@ -23,9 +23,19 @@ const randCode = (length) => {
   return code
 }
 
+/**
+ * 获取文件的后缀
+ * @param filename
+ */
+const getFileType = filename => {
+  const array = filename.split('.')[1]
+  return array
+}
+
 const utils = {
   enbcrypt,
-  randCode
+  randCode,
+  getFileType
 }
 
 module.exports = utils
