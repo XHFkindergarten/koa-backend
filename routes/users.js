@@ -11,8 +11,6 @@ const ValidateRegister = require('../validation/register')
 const ValidateLogin = require('../validation/login')
 // 引入sql语句生成方法
 const SQL = require('../mysql/sql')
-// 引入全球通用头像
-const gravatar = require('gravatar')
 // 引用工具方法
 const Utils = require('../tool/utils')
 // 引入加密和解密工具
@@ -88,9 +86,11 @@ router.post('/register', async ctx => {
     params: {
       name: ctx.request.body.name,
       email: ctx.request.body.email,
-      avatar: gravatar.url(ctx.request.body.email,{
-        s: '200', r: 'pg', d: 'mm'
-      }),
+      avatar: `http://${config.host}/upload/avatar/default-avatar.png`,
+      // 生成全球公用头像
+      // avatar: gravatar.url(ctx.request.body.email,{
+      //   s: '200', r: 'pg', d: 'mm'
+      // }),
       password: Utils.enbcrypt(ctx.request.body.password)
     }
   }
@@ -98,25 +98,44 @@ router.post('/register', async ctx => {
   const sql = SQL.insert(SQLdata)
   const res = await mysql.query(sql)
   if (res.affectedRows==1) {
-    ctx.status = 200
-    ctx.body = {
-      success: true,
-      data: {
-        username: SQLdata.params.name,
-        avatar: SQLdata.params.avatar,
-        email: SQLdata.params.email,
-      },
-      msg: 'congratuations,register success!'
+    console.log(res)
+    const createRole = await mysql.query(SQL.insert({
+      tableName: 'role',
+      params: {
+        userId: res.insertId,
+        roleId: 0
+      }
+    }))
+    if (createRole.affectedRows==1) {
+      ctx.status = 200
+      ctx.body = {
+        success: true,
+        data: {
+          username: SQLdata.params.name,
+          avatar: SQLdata.params.avatar,
+          email: SQLdata.params.email,
+        },
+        msg: 'congratuations,register success!'
+      }
+      return
     }
+  }
+  ctx.status = 400
+  ctx.body = {
+    success: false,
+    msg: 'register failure'
   }
 })
 
 /**
- * @router POST /users/avatar
+ * @router POST /users/uploadImg
+ * @param file上传的图片
+ * @param type 值为avatar代表上传到头像文件夹,为context说明上传到富文本文件夹
  * @description 上传用户头像
  * @access 接口是公开的
  */
-router.post('/avatar', async ctx => {
+router.post('/uploadImg', async ctx => {
+  console.log(ctx.request.body)
   // 获取上传文件
   const file = ctx.request.files.file
   console.log(file)
@@ -131,8 +150,9 @@ router.post('/avatar', async ctx => {
   }
   // 创建可读流
   const reader = fs.createReadStream(file.path)
+  const uniqueKey = Utils.timeValue()
   // 创建写入路径
-  let filePath = path.join(__dirname,'..', 'public/upload/avatar/') + `avatar${ctx.request.body.id}.${Utils.getFileType(file.name)}`
+  let filePath = path.join(__dirname,'..', `public/upload/${ctx.request.body.type}/`) + `${uniqueKey}.${Utils.getFileType(file.type)}`
   console.log(filePath)
   // 创建可写流
   const upStream = fs.createWriteStream(filePath)
@@ -142,7 +162,7 @@ router.post('/avatar', async ctx => {
   ctx.body = {
     success: true,
     msg: 'congratuations,upload avatarImg success!',
-    imgpath: `http://${config.host}/upload/avatar/avatar${ctx.request.body.id}.${Utils.getFileType(file.name)}`
+    imgpath: `http://${config.host}/upload/${ctx.request.body.type}/${uniqueKey}.${Utils.getFileType(file.type)}`
   }
   // 统一图片的长宽，挤成一个正方形
   // let width,height
@@ -329,6 +349,41 @@ router.get('/role', async ctx => {
       })
   } else {
     ctx.status = 400
+  }
+})
+
+/**
+ * @router POST /users/update
+ * @description 更新用户信息
+ * @access 接口是私密的
+ */
+router.post('/update', passport.authenticate('jwt', {session:false}), async ctx => {
+  const id = ctx.request.body.id
+  const keys = Object.keys(ctx.request.body)
+  let params = {}
+  keys.forEach(element => {
+    if (element!='id') {
+      params[element] = ctx.request.body[element]
+    }
+  })
+  const mysql = new Mysql()
+  const updateRes = await mysql.query(SQL.update({
+    tableName: 'users',
+    id: ctx.request.body.id,
+    params
+  }))
+  if (updateRes.affectedRows==1) {
+    ctx.status = 200
+    ctx.body = {
+      success: true,
+      msg: 'congratuations, edit userinfo success!'
+    }
+    return
+  }
+  ctx.status = 400
+  ctx.body = {
+    success: false,
+    msg: 'edit userinfo failure'
   }
 })
 

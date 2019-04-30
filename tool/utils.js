@@ -27,15 +27,25 @@ const randCode = (length) => {
  * 获取文件的后缀
  * @param filename
  */
-const getFileType = filename => {
-  const array = filename.split('.')[1]
-  return array
+const getFileType = typeName => {
+  const type = typeName.split('/')[1]
+  return type
+}
+
+/**
+ * 根据时间生成一个独一无二的数字串
+ * 可以作为文件名
+ */
+const timeValue = () => {
+  const date = new Date()
+  return date.valueOf()
 }
 
 const utils = {
   enbcrypt,
   randCode,
-  getFileType
+  getFileType,
+  timeValue
 }
 
 module.exports = utils

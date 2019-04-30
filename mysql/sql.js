@@ -32,6 +32,17 @@ const produceSQL = {
     sql = sql.substring(0,sql.length-1) + ')'
     return sql
   },
+  update: data => {
+    let sql = `UPDATE ${data.tableName} `
+    const keys = Object.keys(data.params)
+    let keySQL = 'SET '
+    keys.forEach(element => {
+      keySQL += `${element} = '${data.params[element]}',`
+    })
+    keySQL = keySQL.substring(0, keySQL.length-1)
+    sql += `${keySQL} WHERE ID = '${data.id}'`
+    return sql
+  }
 }
 
 module.exports = produceSQL
