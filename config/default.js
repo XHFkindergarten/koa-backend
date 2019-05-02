@@ -7,7 +7,7 @@ const database = require('./db')
 
 const devHost = 'localhost:3000'
 
-const prdHost = ''
+const prdHost = '35.241.100.176:3000'
 
 const host = process.env.NODE_ENV=='development'?devHost:prdHost
 
