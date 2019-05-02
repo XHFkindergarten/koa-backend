@@ -289,6 +289,7 @@ router.post('/login', async ctx => {
       token: 'Bearer ' + token
     }
   } else {
+    console.log('pasword wrong')
     ctx.status = 200
     ctx.body = {
       success: false,
