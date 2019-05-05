@@ -43,7 +43,10 @@ const index = require('./routes/index')
 router.use(index)
 // 引入users路由
 const users = require('./routes/users')
-router.use('/users',users)
+router.use('/users', users)
+// 引入article路由
+const article = require('./routes/article')
+router.use('/article', article)
 
 
 

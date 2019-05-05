@@ -31,7 +31,7 @@ const gm = require('gm').subClass({imageMagick: true})
 /**
  * @router GET /users defaultAPI
  * @description nothinig
- * @access 接口是公开的
+ * @access public 接口是公开的
  */
 router.get('/', (ctx, next) => {
   ctx.status = 200
@@ -44,7 +44,7 @@ router.get('/', (ctx, next) => {
  * @router POST /users/register
  * @description 注册接口API
  * @params name email password password2
- * @access 接口是公开的
+ * @access public 接口是公开的
  */
 router.post('/register', async ctx => {
   // 对输入注册信息进行表单校验
@@ -98,27 +98,40 @@ router.post('/register', async ctx => {
   const sql = SQL.insert(SQLdata)
   const res = await mysql.query(sql)
   if (res.affectedRows==1) {
-    console.log(res)
-    const createRole = await mysql.query(SQL.insert({
-      tableName: 'role',
+    // 注册成功用户的id
+    const id = res.insertId
+    const createdTime = new Date().getTime()
+    const createArticleGroup = await mysql.query(SQL.insert({
+      tableName: 'articleGroup',
       params: {
         userId: res.insertId,
-        roleId: 0
+        createdAt: createdTime,
+        updatedAt: createdTime
       }
     }))
-    if (createRole.affectedRows==1) {
-      ctx.status = 200
-      ctx.body = {
-        success: true,
-        data: {
-          username: SQLdata.params.name,
-          avatar: SQLdata.params.avatar,
-          email: SQLdata.params.email,
-        },
-        msg: 'congratuations,register success!'
+    if (createArticleGroup.affectedRows==1) {
+      const createRole = await mysql.query(SQL.insert({
+        tableName: 'role',
+        params: {
+          userId: res.insertId,
+          roleId: 0
+        }
+      }))
+      if (createRole.affectedRows==1) {
+        ctx.status = 200
+        ctx.body = {
+          success: true,
+          data: {
+            username: SQLdata.params.name,
+            avatar: SQLdata.params.avatar,
+            email: SQLdata.params.email,
+          },
+          msg: 'congratuations,register success!'
+        }
+        return
       }
-      return
     }
+    
   }
   ctx.status = 400
   ctx.body = {
@@ -132,7 +145,7 @@ router.post('/register', async ctx => {
  * @param file上传的图片
  * @param type 值为avatar代表上传到头像文件夹,为context说明上传到富文本文件夹
  * @description 上传用户头像
- * @access 接口是公开的
+ * @access public 接口是公开的
  */
 router.post('/uploadImg', async ctx => {
   console.log(ctx.request.body)
@@ -190,7 +203,7 @@ router.post('/uploadImg', async ctx => {
 /**
  * @router GET /users/sendemail
  * @description 向注册邮箱发送验证邮件
- * @access 接口是公开的
+ * @access public 接口是公开的
  */
 router.get('/sendmail', async ctx => {
   const code = Utils.randCode(6)
@@ -243,7 +256,7 @@ router.get('/sendmail', async ctx => {
  * @description 登录接口API
  * @param email password
  * @return token
- * @access 接口是公开的 
+ * @access public 接口是公开的 
  */
 router.post('/login', async ctx => {
   // 进行表单校验
@@ -301,23 +314,26 @@ router.post('/login', async ctx => {
 /**
  * @router GET /users/current
  * @description 获取用户信息API
- * @access 接口是私密的! 
+ * @access private 接口是私密的! 
  */
 // 使用【jwt策略】进行鉴权,鉴权方法可自行定义，此处在~/config/passport中定义了（不开启session）
 router.get('/current', passport.authenticate('jwt', {session:false}),
   async ctx => {
+    ctx.status = 200
     ctx.body = {
       id: ctx.state.user.id,
       email: ctx.state.user.email,
       username: ctx.state.user.name,
-      avatar: ctx.state.user.avatar
+      avatar: ctx.state.user.avatar,
+      mood: ctx.state.user.mood,
+      sign: ctx.state.user.sign
     }
 })
 
 /**
  * @router GET /users/role
  * @description 根据用户id获取用户权限
- * @access 接口是公开的
+ * @access public 接口是公开的
  */
 router.get('/role', async ctx => {
   if(ctx.request.query.id) {
@@ -356,7 +372,7 @@ router.get('/role', async ctx => {
 /**
  * @router POST /users/update
  * @description 更新用户信息
- * @access 接口是私密的
+ * @access private 接口是私密的
  */
 router.post('/update', passport.authenticate('jwt', {session:false}), async ctx => {
   const id = ctx.request.body.id
