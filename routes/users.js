@@ -386,7 +386,9 @@ router.post('/update', passport.authenticate('jwt', {session:false}), async ctx 
   const mysql = new Mysql()
   const updateRes = await mysql.query(SQL.update({
     tableName: 'users',
-    id: ctx.request.body.id,
+    where: {
+      id: ctx.request.body.id
+    },
     params
   }))
   if (updateRes.affectedRows==1) {
