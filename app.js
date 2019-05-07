@@ -16,6 +16,10 @@ const router = new Router()
 const KoaCors = require('koa-cors')
 app.use(KoaCors())
 
+// koa-helmet插件
+const KoaHelmet = require('koa-helmet')
+app.use(KoaHelmet())
+
 
 // 静态文件中间件，public文件夹中的内容可以被外部访问(需要在router挂载之前)
 app.use(require('koa-static')(__dirname + '/public'))
@@ -47,7 +51,6 @@ router.use('/users', users)
 // 引入article路由
 const article = require('./routes/article')
 router.use('/article', article)
-
 
 
 // 将所有routes挂载在app上

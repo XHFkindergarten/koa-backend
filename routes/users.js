@@ -28,6 +28,13 @@ const path = require('path')
 // 引入图形处理插件gm
 const gm = require('gm').subClass({imageMagick: true})
 
+// 引入用户 Model
+const User = require('../models/UserModel')
+// 引入权限 Model
+const Role = require('../models/RoleModel')
+// 引入文章分组 Model
+const ArticleGroup = require('../models/ArticleGroupModel')
+
 /**
  * @router GET /users defaultAPI
  * @description nothinig
@@ -57,19 +64,14 @@ router.post('/register', async ctx => {
     }
     return 
   }
-
-  const mysql = new Mysql()
-
-  // 查询邮箱是否已经被占用
-  // 生成查询sql语句
-  const sqlEmail = SQL.query({
-    tableName: 'users',
-    params: {
+  const findEmail = await User.findAll({
+    where: {
       email: ctx.request.body.email
     }
   })
-  const emailRes = await mysql.query(sqlEmail)
-  if(emailRes.length!=0){
+  // 查询邮箱是否已经被占用
+  // 生成查询sql语句
+  if (findEmail.length>0) {
     ctx.status = 200
     ctx.body = {
       success: false,
@@ -77,56 +79,38 @@ router.post('/register', async ctx => {
     }
     return 
   }
-
-  // sql数据
-  const SQLdata = {
-    // 表名
-    tableName: 'users',
-    // 参数
-    params: {
-      name: ctx.request.body.name,
-      email: ctx.request.body.email,
-      avatar: `http://${config.host}/upload/avatar/default-avatar.png`,
-      // 生成全球公用头像
-      // avatar: gravatar.url(ctx.request.body.email,{
-      //   s: '200', r: 'pg', d: 'mm'
-      // }),
-      password: Utils.enbcrypt(ctx.request.body.password)
-    }
-  }
-  // 生成sql语句
-  const sql = SQL.insert(SQLdata)
-  const res = await mysql.query(sql)
-  if (res.affectedRows==1) {
-    // 注册成功用户的id
-    const id = res.insertId
-    const createdTime = new Date().getTime()
-    const createArticleGroup = await mysql.query(SQL.insert({
-      tableName: 'articleGroup',
-      params: {
-        userId: res.insertId,
-        createdAt: createdTime,
-        updatedAt: createdTime
-      }
-    }))
-    if (createArticleGroup.affectedRows==1) {
-      const createRole = await mysql.query(SQL.insert({
-        tableName: 'role',
-        params: {
-          userId: res.insertId,
-          roleId: 0
-        }
-      }))
-      if (createRole.affectedRows==1) {
+  const {name, email, password} = ctx.request.body
+  const avatar = `http://${config.host}/upload/avatar/default-avatar.png`
+  // 将用户数据插入users表
+  const res = await User.create({
+    name,
+    email,
+    avatar,
+    password: Utils.enbcrypt(password)
+  })
+  if (res) {
+    const userId = res.null
+    const createRole = await Role.create({
+      userId,
+      role: 0
+    })
+    if (createRole) {
+      // 如果成功，为用户创建一个默认文章分组
+      const time = new Date().getTime()
+      const createGroup = await ArticleGroup.create({
+        userId,
+        createdAt: time,
+        updatedAt: time
+      })
+      if (createGroup) {
         ctx.status = 200
         ctx.body = {
           success: true,
           data: {
-            username: SQLdata.params.name,
-            avatar: SQLdata.params.avatar,
-            email: SQLdata.params.email,
-          },
-          msg: 'congratuations,register success!'
+            username: name,
+            avatar,
+            email
+          }
         }
         return
       }
@@ -134,10 +118,6 @@ router.post('/register', async ctx => {
     
   }
   ctx.status = 400
-  ctx.body = {
-    success: false,
-    msg: 'register failure'
-  }
 })
 
 /**
@@ -330,6 +310,7 @@ router.get('/current', passport.authenticate('jwt', {session:false}),
     }
 })
 
+
 /**
  * @router GET /users/role
  * @description 根据用户id获取用户权限
@@ -338,35 +319,34 @@ router.get('/current', passport.authenticate('jwt', {session:false}),
 router.get('/role', async ctx => {
   if(ctx.request.query.id) {
     const mysql = new Mysql()
-    const queryRole = await mysql.query(SQL.query({
+    const res = await mysql.query(SQL.query({
       tableName: 'role',
       params: {
         userId: ctx.request.query.id
       }
     }))
-      .then(res => {
-        if (res.length>0) {
-          let roles = []
-          res.forEach(r => {
-            roles.push(r.roleId)
-          });
-          ctx.status = 200
-          ctx.body = {
-            success: true,
-            msg: 'congratuations,get roleInfo success!',
-            data: roles
-          }
-        }else {
-          ctx.status = 200
-          ctx.body = {
-            success: true,
-            msg: 'this user got no role'
-          }
-        }
+    if (res.length>0) {
+      let role = []
+      res.forEach(r => {
+        role.push(r.roleId)
       })
-  } else {
-    ctx.status = 400
+      ctx.status = 200
+      ctx.body = {
+        success: true,
+        msg: 'congratuations,get roleInfo success!',
+        data: role
+      }
+      return
+    } else {
+      ctx.status = 200
+      ctx.body = {
+        success: true,
+        msg: 'this user got no role'
+      }
+      return
+    }
   }
+  ctx.status = 400
 })
 
 /**
@@ -404,6 +384,21 @@ router.post('/update', passport.authenticate('jwt', {session:false}), async ctx 
     success: false,
     msg: 'edit userinfo failure'
   }
+})
+
+/**
+ * @description 测试接口
+ */
+router.post('/testCreate', async ctx => {
+  console.log(ctx.request.body)
+  const res = await User.create({
+    name: 'testname',
+    email: 'text@qq.com',
+    password: '???',
+    mood: 'mood',
+    sign: 'sign'
+  })
+  console.log(res)
 })
 
 

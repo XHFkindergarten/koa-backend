@@ -12,6 +12,11 @@ const Utils = require('../tool/utils')
 // 引入鉴权工具 koa-passport
 const passport = require('koa-passport')
 
+// 引入文章Model
+const Article = require('../models/ArticleModel')
+// 引入文章分组Model
+const ArticleGroup = require('../models/ArticleGroupModel')
+
 /**
  * @router POST /article/addGroup
  * @description 为某个用户添加文章分组
@@ -21,22 +26,17 @@ const passport = require('koa-passport')
 router.post('/addGroup', passport.authenticate('jwt', {session:false}), async ctx => {
     // 获取当前的时间戳（毫秒数格式）
     const time = new Date().getTime()
-    console.log(time)
-    const mysql = new Mysql()
-    const addGroup = await mysql.query(SQL.insert({
-      tableName: 'articleGroup',
-      params: {
-        userId: ctx.request.body.userId,
-        name: ctx.request.body.name,
-        createdAt: time,
-        updatedAt: time
-      }
-    }))
-    if (addGroup.affectedRows==1) {
+    const res = await ArticleGroup.create({
+      userId: ctx.request.body.userId,
+      name: ctx.request.body.name,
+      createdAt: time,
+      updatedAt: time
+    })
+    if (res) {
       ctx.status = 200
       ctx.body = {
         success: true,
-        msg: 'contratuations, u successfully add a group!',
+        msg: 'save Group success'
       }
       return
     }
@@ -51,29 +51,26 @@ router.post('/addGroup', passport.authenticate('jwt', {session:false}), async ct
  */
 
 router.get('/getGroup',passport.authenticate('jwt', {session:false}),async ctx => {
-  const id = ctx.query.userId
-  const mysql = new Mysql()
-  const queryGroup = await mysql.query(SQL.query({
-    tableName: 'articleGroup',
-    params: {
-      userId: id
+  const userId = ctx.query.userId
+  const groups = await ArticleGroup.findAll({
+    where: {
+      userId
     }
-  }))
-  if (queryGroup.length>0) {
+  })
+  if (groups) {
     ctx.status = 200
     ctx.body = {
-      success: true,
-      msg: 'congratuations,query article group success!',
-      group: queryGroup
+      success: true
+    }
+    if (groups.length>0) {
+      ctx.body.group = groups
+      ctx.body.msg = 'get groups success'
+    } else {
+      ctx.body.msg = 'no group'
     }
     return
-  } else {
-    ctx.status = 200
-    ctx.body = {
-      success: false,
-      msg: '没有创建任何文章分组'
-    }
   }
+  ctx.status = 400
 })
 
 /**
@@ -84,23 +81,22 @@ router.get('/getGroup',passport.authenticate('jwt', {session:false}),async ctx =
  * @access private
  */
 router.post('/editGroupName',passport.authenticate('jwt', {session:false}),async ctx => {
-  const mysql = new Mysql()
-  const res = await mysql.query(SQL.update({
-    tableName: 'articleGroup',
+  const group = await ArticleGroup.findOne({
     where: {
       id: ctx.request.body.id
-    },
-    params: {
-      name: ctx.request.body.name
     }
-  }))
-  if (res.affectedRows==1) {
-    ctx.status = 200
-    ctx.body = {
-      success: true,
-      msg: 'congratuations, update group info success!'
+  })
+  if (group) {
+    group.name = ctx.request.body.name
+    const res = await group.save()
+    if (res) {
+      ctx.status = 200
+      ctx.body = {
+        success: true,
+        msg: 'update group info success!'
+      }
+      return
     }
-    return
   }
   ctx.status = 400
 })
@@ -112,19 +108,16 @@ router.post('/editGroupName',passport.authenticate('jwt', {session:false}),async
  * @access private
  */
 router.post('/deleteGroup',passport.authenticate('jwt', {session:false}),async ctx => {
-  console.log(ctx.request.body.id)
-  const mysql = new Mysql()
-  const res = await mysql.query(SQL.delete({
-    tableName: 'articleGroup',
+  const res = await ArticleGroup.destroy({
     where: {
       id: ctx.request.body.id
     }
-  }))
-  if (res.affectedRows==1) {
+  })
+  if (res) {
     ctx.status = 200
     ctx.body = {
       success: true,
-      msg: 'congratuations, delete Article group success'
+      msg: 'delete Article group success'
     }
     return
   }
@@ -145,38 +138,32 @@ router.post('/deleteGroup',passport.authenticate('jwt', {session:false}),async c
  * @access private
  */
 router.post('/addArticle', passport.authenticate('jwt', {session:false}), async ctx => {
-  console.log(ctx.request.body)
   const { userId, groupId, content } = ctx.request.body
   const time = new Date().getTime()
-  const mysql = new Mysql()
-  
-  // 获取该分组中已有的文章条数
-  const groupLength = await mysql.query(SQL.count({
-    tableName: 'article',
-    params: {
+  let articleNum
+  const articles = await Article.findAll({
+    where: {
       groupId
     }
-  }))
-  const length = groupLength[0]['COUNT(*)']
-
-  const res = await mysql.query(SQL.insert({
-    tableName: 'article',
-    params: {
-      title: `未命名(${length})`,
+  })
+  if (articles) {
+    articleNum = articles.length
+    const res = await Article.create({
+      title: `未命名(${articleNum})`,
       userId,
       groupId,
       content,
       createdAt: time,
       updatedAt: time
+    })
+    if (res) {
+      ctx.status = 200
+      ctx.body = {
+        success: true,
+        msg: 'create Article success!'
+      }
+      return
     }
-  }))
-  if (res.affectedRows==1) {
-    ctx.status = 200
-    ctx.body = {
-      success: true,
-      msg: 'congratulations, create article success!',
-    }
-    return
   }
   ctx.status = 400
 })
@@ -189,26 +176,86 @@ router.post('/addArticle', passport.authenticate('jwt', {session:false}), async 
  */
 router.get('/getArticleList', passport.authenticate('jwt', {session:false}), async ctx => {
   const groupId = ctx.query.groupId
-  console.log(groupId)
-  const mysql = new Mysql()
-  const res = await mysql.query(SQL.query({
-    tableName: 'article',
-    params: {
+
+  const articles = await Article.findAll({
+    where: {
       groupId
     }
-  }))
-  if (res) {
+  })
+  if (articles) {
     ctx.status = 200
     ctx.body = {
       success: true,
-      article: res
+      article: articles
     }
     return
   }
   ctx.status = 400
 })
 
+/**
+ * @router POST /article/updateArticle
+ * @description 修改文章
+ * @params id 文章id
+ * @params content 文章内容
+ * @params title 文章标题
+ * @params summary 文章大意(自动生成)
+ * @params label_img 标签图
+ * @params updatedAt 更新时间(自动生成)
+ * @access private
+ */
+router.post('/updateArticle', passport.authenticate('jwt', {session:false}), async ctx => {
+  // 文章id
+  const id = ctx.request.body.id
+  // 文章内容
+  const content = ctx.request.body.content
+  // 更新内容
+  const updatedAt = new Date().getTime()
+  // 标题
+  const title = ctx.request.body.title
+  
+  const article = await Article.findOne({
+    where: {
+      id
+    }
+  })
+  article.updatedAt = updatedAt
+  article.content = content
+  article.title = title
+  const res = await article.save()
+  if (res) {
+    ctx.status = 200
+    ctx.body = {
+      success: true,
+      msg: 'update article success'
+    }
+    return
+  }
+  ctx.status = 400
+})
 
+/**
+ * @router POST /article/deleteArticle
+ * @description 删除文章
+ * @params id 文章id
+ * @access private
+ */
+router.post('/deleteArticle', passport.authenticate('jwt', {session:false}), async ctx => {
+  const res = await Article.destroy({
+    where: {
+      id: ctx.request.body.id
+    }
+  })
+  if (res) {
+    ctx.status = 200
+    ctx.body = {
+      success: true,
+      msg: 'congratulations, delete article success!'
+    }
+    return 
+  }
+  ctx.status = 400
+})
 
 
 

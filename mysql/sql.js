@@ -65,6 +65,7 @@ const produceSQL = {
     whereSQL = whereSQL.substring(0, whereSQL.length-1)
     // SQL语句组装
     sql += `${keySQL} ${whereSQL}`
+    console.log(sql)
     return sql
   },
   /**
