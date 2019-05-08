@@ -356,34 +356,56 @@ router.get('/role', async ctx => {
  */
 router.post('/update', passport.authenticate('jwt', {session:false}), async ctx => {
   const id = ctx.request.body.id
-  const keys = Object.keys(ctx.request.body)
-  let params = {}
-  keys.forEach(element => {
-    if (element!='id') {
-      params[element] = ctx.request.body[element]
+  const params = ctx.request.body
+  delete params.id
+  const user = await User.findOne({
+    where: {
+      id
     }
   })
-  const mysql = new Mysql()
-  const updateRes = await mysql.query(SQL.update({
-    tableName: 'users',
-    where: {
-      id: ctx.request.body.id
-    },
-    params
-  }))
-  if (updateRes.affectedRows==1) {
+  const keys = Object.keys(params)
+  keys.forEach(key => {
+    user[key] = params[key]
+  })
+  const res = await user.save()
+  if (res) {
     ctx.status = 200
     ctx.body = {
       success: true,
-      msg: 'congratuations, edit userinfo success!'
+      msg: 'update userinfo success'
     }
     return
   }
   ctx.status = 400
-  ctx.body = {
-    success: false,
-    msg: 'edit userinfo failure'
-  }
+
+  // const keys = Object.keys(ctx.request.body)
+  // let params = {}
+  // keys.forEach(element => {
+  //   if (element!='id') {
+  //     params[element] = ctx.request.body[element]
+  //   }
+  // })
+  // const mysql = new Mysql()
+  // const updateRes = await mysql.query(SQL.update({
+  //   tableName: 'users',
+  //   where: {
+  //     id: ctx.request.body.id
+  //   },
+  //   params
+  // }))
+  // if (updateRes.affectedRows==1) {
+  //   ctx.status = 200
+  //   ctx.body = {
+  //     success: true,
+  //     msg: 'congratuations, edit userinfo success!'
+  //   }
+  //   return
+  // }
+  // ctx.status = 400
+  // ctx.body = {
+  //   success: false,
+  //   msg: 'edit userinfo failure'
+  // }
 })
 
 /**

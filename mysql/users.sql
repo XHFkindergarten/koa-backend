@@ -11,7 +11,7 @@
  Target Server Version : 80012
  File Encoding         : 65001
 
- Date: 02/05/2019 22:15:37
+ Date: 08/05/2019 22:54:36
 */
 
 SET NAMES utf8mb4;
@@ -20,22 +20,13 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- ----------------------------
 -- Table structure for users
 -- ----------------------------
-DROP TABLE IF EXISTS `users`;
-CREATE TABLE `users` (
-  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '用户id',
-  `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '用户名',
-  `email` varchar(255) NOT NULL COMMENT '注册邮箱',
-  `password` varchar(255) NOT NULL COMMENT '用户密码',
-  `avatar` varchar(255) DEFAULT NULL COMMENT '用户头像',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1026 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of users
 -- ----------------------------
 BEGIN;
-INSERT INTO `users` VALUES (1024, 'lzk', '1131911308@qq.com', '$2b$10$hxuakXxTcRiTLU6Z1O93W.PNPSn70K1TFAcHW0wly1NyXVgBeTpy.', 'http://localhost:3000/upload/avatar/1556676727159.png');
-INSERT INTO `users` VALUES (1025, 'XHFkindergarten', '791319924@qq.com', '$2b$10$Iu2SSPIv0KMDmEraE3gYEeMvUJGcZ.q9HBZ2wmN5MhMWbKsy9.YxS', 'http://localhost:3000/upload/avatar/default-avatar.png');
+INSERT INTO `users` VALUES (1031, 'XHFk1ndergarten', '1131911308@qq.com', '$2b$10$Exn/RRI8TdFi2059n3zpE.HPHY09XL71Rwe5.jEpuE5x/SZASANfy', 'http://localhost:3000/upload/avatar/1557241841384.png', '1', 'Coding...');
+INSERT INTO `users` VALUES (1037, '风魔小次郎1', '791319924@qq.com', '$2b$10$b3EkX91VgyxRUKxUSGUI3e7AugGg4LXQxCsTUmHZZfW8EkhlK29JK', 'http://localhost:3000/upload/avatar/1557307500362.png', '0', 'Focusing');
 COMMIT;
 
 SET FOREIGN_KEY_CHECKS = 1;

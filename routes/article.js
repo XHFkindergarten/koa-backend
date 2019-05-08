@@ -12,11 +12,12 @@ const Utils = require('../tool/utils')
 // 引入鉴权工具 koa-passport
 const passport = require('koa-passport')
 
-// 引入文章Model
+// 引入文章 Model
 const Article = require('../models/ArticleModel')
-// 引入文章分组Model
+// 引入文章分组 Model
 const ArticleGroup = require('../models/ArticleGroupModel')
-
+// 引入用户 Model
+const User = require('../models/UserModel')
 /**
  * @router POST /article/addGroup
  * @description 为某个用户添加文章分组
@@ -170,16 +171,16 @@ router.post('/addArticle', passport.authenticate('jwt', {session:false}), async 
 
 /**
  * @router POST /article/getArticleList
- * @description 获取某个用户某个分组的文章列表
- * @params groupId
+ * @description 根据条件文章列表
+ * @params userId || groupId
  * @access private
  */
 router.get('/getArticleList', passport.authenticate('jwt', {session:false}), async ctx => {
-  const groupId = ctx.query.groupId
-
   const articles = await Article.findAll({
-    where: {
-      groupId
+    where: ctx.query,
+    include: {
+      model: User,
+      as: 'userInfo'
     }
   })
   if (articles) {
@@ -209,6 +210,12 @@ router.post('/updateArticle', passport.authenticate('jwt', {session:false}), asy
   const id = ctx.request.body.id
   // 文章内容
   const content = ctx.request.body.content
+  // 获取文章的简介
+  const reg1 = new RegExp("<.+?>","g")
+  const reg2 = new RegExp("&.*;","g")
+  let summary = content.replace(reg1, '')
+  summary = summary.replace(reg2, '')
+  summary = summary.substring(0,100) + '...'
   // 更新内容
   const updatedAt = new Date().getTime()
   // 标题
@@ -222,6 +229,7 @@ router.post('/updateArticle', passport.authenticate('jwt', {session:false}), asy
   article.updatedAt = updatedAt
   article.content = content
   article.title = title
+  article.summary = summary
   const res = await article.save()
   if (res) {
     ctx.status = 200
@@ -253,6 +261,34 @@ router.post('/deleteArticle', passport.authenticate('jwt', {session:false}), asy
       msg: 'congratulations, delete article success!'
     }
     return 
+  }
+  ctx.status = 400
+})
+
+/**
+ * @router GET /article/getAllArticle
+ * @description 获取所有文章流
+ * @access public
+ */
+router.get('/getAllArticle', async ctx => {
+  const res = await Article.findAll({
+    include: {
+      model: User,
+      as: 'userInfo'
+    },
+    // 根据更新时间降序查找，最新编辑的文章放在最上面
+    order: [
+      ['updatedAt', 'DESC']
+    ]
+  })
+  console.log(res)
+  if (res.length>0) {
+    ctx.status = 200
+    ctx.body = {
+      success: true,
+      article: res
+    }
+    return
   }
   ctx.status = 400
 })
