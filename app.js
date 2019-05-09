@@ -48,6 +48,9 @@ router.use('/users', users)
 // 引入article路由
 const article = require('./routes/article')
 router.use('/article', article)
+// 引入comment路由
+const comment = require('./routes/comment')
+router.use('/comment', comment)
 
 
 // 将所有routes挂载在app上

@@ -18,6 +18,10 @@ const Article = require('../models/ArticleModel')
 const ArticleGroup = require('../models/ArticleGroupModel')
 // 引入用户 Model
 const User = require('../models/UserModel')
+// 引入like Model
+const Like = require('../models/LikeModel')
+
+
 /**
  * @router POST /article/addGroup
  * @description 为某个用户添加文章分组
@@ -248,7 +252,7 @@ router.post('/updateArticle', passport.authenticate('jwt', {session:false}), asy
  * @params id 文章id
  * @access private
  */
-router.post('/deleteArticle', passport.authenticate('jwt', {session:false}), async ctx => {
+router.post('/deleteArticle', async ctx => {
   const res = await Article.destroy({
     where: {
       id: ctx.request.body.id
@@ -293,6 +297,129 @@ router.get('/getAllArticle', async ctx => {
   ctx.status = 400
 })
 
+/**
+ * @router GET /article/getOneArticle
+ * @description 根据文章id获取文章
+ * @access public
+ */
+router.get('/getOneArticle', async ctx => {
+  const id = ctx.query.id
+  const res = await Article.findOne({
+    where: {
+      id
+    },
+    include: {
+      model: User,
+      as: 'userInfo'
+    }
+  })
+  if (res) {
+    ctx.status = 200
+    ctx.body = {
+      success: true,
+      article: res,
+      msg: 'get one article success'
+    }
+    return 
+  }
+  ctx.status = 400
+})
+
+/**
+ * @router POST /article/likeArticle
+ * @description 用户点击喜欢某一篇文章
+ * @access private
+ */
+router.post('/likeArticle', passport.authenticate('jwt', {session:false}), async ctx => {
+  const userId = ctx.request.body.userId
+  const articleId = ctx.request.body.articleId
+  const time = new Date().getTime()
+  const res = await Like.create({
+    userId,
+    articleId,
+    time
+  })
+  if (res) {
+    const article = await Article.findOne({
+      where: {
+        id: articleId
+      }
+    })
+    article.likeNum++
+    const update = await article.save()
+    if (update) {
+      ctx.status = 200
+      ctx.body = {
+        success: true,
+        msg: 'like success'
+      }
+      return
+    }
+  }
+  ctx.status = 400
+})
+
+/**
+ * @router GET /article/articleLikeList
+ * @description 获取给文章点过赞的用户
+ * @access public
+ */
+router.get('/articleLikeList', async ctx => {
+  const articleId = ctx.query.articleId
+  console.log(articleId)
+  const res = await Like.findAll({
+    where: {
+      articleId
+    }
+  })
+  if (res) {
+    const likeList = []
+    res.forEach(item => {
+      likeList.push(item.userId)
+    })
+    ctx.status = 200
+    ctx.body = {
+      success: true,
+      likeList,
+      msg: 'get likeList success'
+    }
+    return
+  }
+  ctx.status = 400
+})
+
+/**
+ * @router POST /article/dislikeArticle
+ * @description 用户取消喜欢一篇文章
+ * @access private
+ */
+router.post('/dislikeArticle', passport.authenticate('jwt', {session:false}), async ctx => {
+  const { userId, articleId } = ctx.request.body
+  const res = Like.destroy({
+    where: {
+      userId,
+      articleId
+    }
+  })
+  if (res) {
+    const article = await Article.findOne({
+      where: {
+        id: articleId
+      }
+    })
+    article.likeNum--
+    const update = await article.save()
+    if (update) {
+      ctx.status = 200
+      ctx.body = {
+        success: true,
+        msg: 'dislike article success'
+      }
+      return
+    }
+  }
+  ctx.status = 400
+})
 
 
 module.exports = router.routes()
