@@ -217,6 +217,7 @@ router.get('/getArticleList', passport.authenticate('jwt', {session:false}), asy
  * @access private
  */
 router.post('/updateArticle', passport.authenticate('jwt', {session:false}), async ctx => {
+  console.log(ctx.request.body)
   const updateArt = await sequelize.transaction(async t => {
     // 文章id
     const id = ctx.request.body.id
@@ -304,15 +305,12 @@ router.get('/getAllArticle', async ctx => {
       ['updatedAt', 'DESC']
     ]
   })
-  console.log(res)
-  if (res.length>0) {
-    ctx.status = 200
-    ctx.body = {
-      success: true,
-      article: res
-    }
-    return
+  ctx.status = 200
+  ctx.body = {
+    success: true,
+    article: res
   }
+  return
   ctx.status = 400
 })
 
