@@ -7,7 +7,7 @@ const database = require('./db')
 
 const devHost = 'localhost:3000'
 
-const prdHost = 'localhost:3000'
+const prdHost = 'www.xhfkindergarten.cn:3000'
 
 const host = process.env.NODE_ENV=='development'?devHost:prdHost
 
@@ -17,19 +17,22 @@ const emailInfo = (code) => {
   const info = {
     from: '1131911308@qq.com',  // 发送人
     subject: 'XHFkindergarten.com邮箱验证码',  // 邮件标题
-    html: `<div style="display: flex;
-    justify-content: center;
-    align-items: center;">
-    <h2>感谢注册XHFkindergarten的网站</h2>
-  </div>
-  <div style="display: flex;
-  justify-content: center;
-  align-items: center;">
-    <h2>您收到的验证码为:</h2>
-  </div>
-  <div style="display: flex;
-  justify-content: center;
-  align-items: center;"><h1>${code}</h1></div>` // 发送内容
+    html: `
+    <div style="display: flex;
+      justify-content: center;
+      align-items: center;">
+      <h2>感谢注册XHFkindergarten的网站</h2>
+    </div>
+    <div style="display: flex;
+      justify-content: center;
+      align-items: center;">
+      <h2>您收到的验证码为:</h2>
+    </div>
+    <div style="display: flex;
+      justify-content: center;
+      align-items: center;">
+      <h1>${code}</h1>
+    </div>` // 发送内容
   }
   return info
 }
