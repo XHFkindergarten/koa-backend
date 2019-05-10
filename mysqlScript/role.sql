@@ -28,12 +28,6 @@ CREATE TABLE `role` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1029 DEFAULT CHARSET=utf8;
 
--- ----------------------------
--- Records of role
--- ----------------------------
-BEGIN;
-INSERT INTO `role` VALUES (1027, 1031, 0);
-INSERT INTO `role` VALUES (1028, 1037, 0);
-COMMIT;
+
 
 SET FOREIGN_KEY_CHECKS = 1;

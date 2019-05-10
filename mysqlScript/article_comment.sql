@@ -35,9 +35,9 @@ CREATE TABLE `article_comment` (
 -- ----------------------------
 -- Records of article_comment
 -- ----------------------------
-BEGIN;
-INSERT INTO `article_comment` VALUES (1094, 'test1', 1557401866523, 1072, 1031, 0, 0);
-INSERT INTO `article_comment` VALUES (1103, '这篇文章写得真好！', 1557409674732, 1072, 1031, 0, 0);
-COMMIT;
+-- BEGIN;
+-- INSERT INTO `article_comment` VALUES (1094, 'test1', 1557401866523, 1072, 1031, 0, 0);
+-- INSERT INTO `article_comment` VALUES (1103, '这篇文章写得真好！', 1557409674732, 1072, 1031, 0, 0);
+-- COMMIT;
 
 SET FOREIGN_KEY_CHECKS = 1;

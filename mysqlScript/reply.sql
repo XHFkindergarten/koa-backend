@@ -31,11 +31,5 @@ CREATE TABLE `reply` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1132 DEFAULT CHARSET=utf8;
 
--- ----------------------------
--- Records of reply
--- ----------------------------
-BEGIN;
-INSERT INTO `reply` VALUES (1100, 1103, 1031, '你说的也很好', 1557411467762, 1072);
-COMMIT;
 
 SET FOREIGN_KEY_CHECKS = 1;
