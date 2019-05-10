@@ -110,7 +110,6 @@ router.get('/getComment', async ctx => {
  */
 router.post('/addReply', passport.authenticate('jwt', {session:false}), async ctx => {
   const res = await sequelize.transaction(async t => {
-    console.log(ctx.request.body)
     const {userId, articleId, commentId, content} = ctx.request.body
     const time = new Date().getTime()
     const addReply = await Reply.create({
@@ -131,13 +130,6 @@ router.post('/addReply', passport.authenticate('jwt', {session:false}), async ct
     }, {
       t
     })
-    // const updateArt = await Article.update({
-    //   commentNum: commentNum+1
-    // }, {
-    //   where: {
-    //     id: articleId
-    //   }
-    // }, t)
     ctx.status = 200
     ctx.body = {
       success: true,

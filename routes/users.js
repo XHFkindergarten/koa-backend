@@ -28,6 +28,8 @@ const path = require('path')
 // 引入图形处理插件gm
 const gm = require('gm').subClass({imageMagick: true})
 
+// 引入sequelize
+const sequelize = require('../mysql/sequelize')
 // 引入用户 Model
 const User = require('../models/UserModel')
 // 引入权限 Model
@@ -123,15 +125,13 @@ router.post('/register', async ctx => {
 /**
  * @router POST /users/uploadImg
  * @param file上传的图片
- * @param type 值为avatar代表上传到头像文件夹,为context说明上传到富文本文件夹
+ * @param type 值为avatar代表上传到头像文件夹,为context说明上传到富文本文件夹,为label上传标签图文件夹
  * @description 上传用户头像
  * @access public 接口是公开的
  */
 router.post('/uploadImg', async ctx => {
-  console.log(ctx.request.body)
   // 获取上传文件
   const file = ctx.request.files.file
-  console.log(file)
   // 如果文件不是图片，返回错误
   if (file.type!='image/jpeg' && file.type!='image/jpg' && file.type!='image/png') {
     ctx.status = 200
@@ -377,50 +377,37 @@ router.post('/update', passport.authenticate('jwt', {session:false}), async ctx 
     return
   }
   ctx.status = 400
-
-  // const keys = Object.keys(ctx.request.body)
-  // let params = {}
-  // keys.forEach(element => {
-  //   if (element!='id') {
-  //     params[element] = ctx.request.body[element]
-  //   }
-  // })
-  // const mysql = new Mysql()
-  // const updateRes = await mysql.query(SQL.update({
-  //   tableName: 'users',
-  //   where: {
-  //     id: ctx.request.body.id
-  //   },
-  //   params
-  // }))
-  // if (updateRes.affectedRows==1) {
-  //   ctx.status = 200
-  //   ctx.body = {
-  //     success: true,
-  //     msg: 'congratuations, edit userinfo success!'
-  //   }
-  //   return
-  // }
-  // ctx.status = 400
-  // ctx.body = {
-  //   success: false,
-  //   msg: 'edit userinfo failure'
-  // }
 })
 
 /**
- * @description 测试接口
+ * @router GET /users/getOneUser
+ * @description 根据用户id获取基本信息
+ * @access public
  */
-router.post('/testCreate', async ctx => {
-  console.log(ctx.request.body)
-  const res = await User.create({
-    name: 'testname',
-    email: 'text@qq.com',
-    password: '???',
-    mood: 'mood',
-    sign: 'sign'
+router.get('/getOneUser', async ctx => {
+  const id = ctx.query.id
+  const user = await User.findOne({
+    where: {
+      id
+    }
   })
-  console.log(res)
+  if (user) {
+    ctx.status = 200
+    ctx.body = {
+      success: true,
+      msg: 'get userinfo',
+      user: {
+        avatar: user.avatar,
+        email: user.email,
+        id: user.id,
+        name: user.name,
+        mood: user.mood,
+        sign: user.sign
+      }
+    }
+    return
+  }
+  ctx.status = 400
 })
 
 

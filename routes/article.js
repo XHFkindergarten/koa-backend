@@ -161,7 +161,8 @@ router.post('/addArticle', passport.authenticate('jwt', {session:false}), async 
       groupId,
       content,
       createdAt: time,
-      updatedAt: time
+      updatedAt: time,
+      labelImg: `http://${config.host}/upload/label/default_label_img.jpg`
     })
     if (res) {
       ctx.status = 200
@@ -187,7 +188,11 @@ router.get('/getArticleList', passport.authenticate('jwt', {session:false}), asy
     include: {
       model: User,
       as: 'userInfo'
-    }
+    },
+    // 根据更新时间降序查找，最新评论在上面
+    order: [
+      ['updated_at', 'DESC']
+    ]
   })
   if (articles) {
     ctx.status = 200
@@ -212,40 +217,52 @@ router.get('/getArticleList', passport.authenticate('jwt', {session:false}), asy
  * @access private
  */
 router.post('/updateArticle', passport.authenticate('jwt', {session:false}), async ctx => {
-  // 文章id
-  const id = ctx.request.body.id
-  // 文章内容
-  const content = ctx.request.body.content
-  // 获取文章的简介
-  const reg1 = new RegExp("<.+?>","g")
-  const reg2 = new RegExp("&.*;","g")
-  let summary = content.replace(reg1, '')
-  summary = summary.replace(reg2, '')
-  summary = summary.substring(0,100) + '...'
-  // 更新内容
-  const updatedAt = new Date().getTime()
-  // 标题
-  const title = ctx.request.body.title
-  
-  const article = await Article.findOne({
-    where: {
-      id
+  const updateArt = await sequelize.transaction(async t => {
+    // 文章id
+    const id = ctx.request.body.id
+    // 查找文章
+    const article = await Article.findOne({
+      where: {
+        id
+      },
+      t
+    })
+    const params = {}
+    if (ctx.request.body.content) {
+      // 文章内容
+      const content = ctx.request.body.content
+      params.content = content
+
+      // 获取文章的简介
+      const reg1 = new RegExp("<.+?>","g")
+      const reg2 = new RegExp("&.*;","g")
+      let summary = content.replace(reg1, '')
+      summary = summary.replace(reg2, '')
+      summary = summary.substring(0,100) + '...'
+      params.summary = summary
     }
-  })
-  article.updatedAt = updatedAt
-  article.content = content
-  article.title = title
-  article.summary = summary
-  const res = await article.save()
-  if (res) {
+
+    if (ctx.request.body.title) {
+      // 标题
+      params.title = ctx.request.body.title
+    }
+
+    if (ctx.request.body.labelImg) {
+      params.labelImg = ctx.request.body.labelImg
+    }
+
+    // 更新时间
+    params.updatedAt = new Date().getTime()
+
+    const res = await article.update(params, {t})
     ctx.status = 200
     ctx.body = {
       success: true,
       msg: 'update article success'
     }
-    return
-  }
-  ctx.status = 400
+  }).catch(err => {
+    ctx.status = 400
+  })
 })
 
 /**
