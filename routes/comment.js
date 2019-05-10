@@ -124,10 +124,20 @@ router.post('/addReply', passport.authenticate('jwt', {session:false}), async ct
       where: {
         id: articleId
       }
-    }, t)
-    const updateArt = await article.update({
-      commentNum: article.commentNum+1
     })
+    // article.commentNum++
+    const saveArt = await article.update({
+      commentNum: article.commentNum+1
+    }, {
+      t
+    })
+    // const updateArt = await Article.update({
+    //   commentNum: commentNum+1
+    // }, {
+    //   where: {
+    //     id: articleId
+    //   }
+    // }, t)
     ctx.status = 200
     ctx.body = {
       success: true,

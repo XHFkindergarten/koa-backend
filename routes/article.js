@@ -20,6 +20,8 @@ const ArticleGroup = require('../models/ArticleGroupModel')
 const User = require('../models/UserModel')
 // 引入like Model
 const Like = require('../models/LikeModel')
+// 引入sequelize
+const sequelize = require('../mysql/sequelize')
 
 
 /**
@@ -419,6 +421,35 @@ router.post('/dislikeArticle', passport.authenticate('jwt', {session:false}), as
     }
   }
   ctx.status = 400
+})
+
+/**
+ * @router GET /article/viewArticle
+ * @description 增加文章的查看次数
+ * @access public
+ */
+router.get('/viewArticle', async ctx => {
+  const res = await sequelize.transaction(async t => {
+    const id = ctx.query.id
+    const article = await Article.findOne({
+      where: {
+        id
+      },
+      t
+    })
+    const saveArt = await article.update({
+      viewTime: article.viewTime+1
+    }, {
+      t
+    })
+    ctx.status = 200
+    ctx.body = {
+      success: true,
+      msg: 'view article success'
+    }
+  }).catch(err => {
+    ctx.status = 400
+  })
 })
 
 
