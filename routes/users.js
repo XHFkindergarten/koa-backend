@@ -151,32 +151,32 @@ router.post('/uploadImg', async ctx => {
   const upStream = fs.createWriteStream(filePath)
   // 可读流通过管道写入可写流
   reader.pipe(upStream)
+
+  // 增加缩略图
+  if (ctx.request.type=='label') {
+    gm(filePath)
+    .identify(function(err, data) {
+      if(!err) {
+        gm(filePath)
+          .quality(10)
+          .noProfile()
+          .write(filePath, function(err){
+            if(!err){
+              ctx.status = 200
+              ctx.body = {
+                msg: 'success'
+              }
+            }
+          })
+      }
+    })
+  }
   ctx.status = 200
   ctx.body = {
     success: true,
     msg: 'congratuations,upload avatarImg success!',
     imgpath: `http://${config.host}/upload/${ctx.request.body.type}/${uniqueKey}.${Utils.getFileType(file.type)}`
   }
-  // 统一图片的长宽，挤成一个正方形
-  // let width,height
-  // gm(filePath)
-  //   .identify(function(err, data) {
-  //     if(!err) {
-  //       const {width, height} = data.size
-  //       const side = Math.min(width, height)
-  //       gm(filePath)
-  //         .resize(side, side,'!')
-  //         .noProfile()
-  //         .write(filePath, function(err){
-  //           if(!err){
-  //             ctx.status = 200
-  //             ctx.body = {
-  //               msg: 'success'
-  //             }
-  //           }
-  //         })
-  //     }
-  //   })
   
 })
 
