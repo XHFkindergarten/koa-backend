@@ -15,7 +15,7 @@ const Article = sequelize.define('article', {
     type: Sequelize.INTEGER,
     field: 'group_id'
   },
-  content: Sequelize.TEXT,
+  content: Sequelize.TEXT('long'),
   summary: Sequelize.STRING(255),
   title: Sequelize.STRING(255),
   labelImg: {

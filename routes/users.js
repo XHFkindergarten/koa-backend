@@ -153,6 +153,7 @@ router.post('/uploadImg', async ctx => {
   reader.pipe(upStream)
 
   // 增加缩略图
+  // TODO 为什么这个图片处理的回调函数无法return
   if (ctx.request.type=='label') {
     gm(filePath)
     .identify(function(err, data) {
