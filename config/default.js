@@ -11,11 +11,7 @@ const prdHost = '35.241.100.176:3000'
 
 const host = process.env.NODE_ENV=='development'?devHost:prdHost
 
-<<<<<<< HEAD
 // 七牛云服务器
-=======
-// 七牛云图片服务器
->>>>>>> 32bc6582a701dcbc06004647707fae63620932e0
 const imgHost = 'img.xhfkindergarten.cn'
 
 const code = '123'
