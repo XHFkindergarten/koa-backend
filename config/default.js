@@ -22,6 +22,14 @@ const emailInfo = (code) => {
     subject: 'XHFkindergarten.com邮箱验证码',  // 邮件标题
     html: `
     <div style="display: flex;
+      flex-direction: cloumn;
+      justify-content: center;
+      align-items: center;">
+      <img style="width:300px" src="http://img.xhfkindergarten.cn/default-bird.png" />
+    </div>
+    
+    <div style="display: flex;
+      flex-direction: cloumn;
       justify-content: center;
       align-items: center;">
       <h2>感谢注册XHFkindergarten的网站</h2>
