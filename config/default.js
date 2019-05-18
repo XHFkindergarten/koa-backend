@@ -11,7 +11,11 @@ const prdHost = '35.241.100.176:3000'
 
 const host = process.env.NODE_ENV=='development'?devHost:prdHost
 
+<<<<<<< HEAD
 // 七牛云服务器
+=======
+// 七牛云图片服务器
+>>>>>>> 32bc6582a701dcbc06004647707fae63620932e0
 const imgHost = 'img.xhfkindergarten.cn'
 
 const code = '123'
@@ -22,6 +26,14 @@ const emailInfo = (code) => {
     subject: 'XHFkindergarten.com邮箱验证码',  // 邮件标题
     html: `
     <div style="display: flex;
+      flex-direction: cloumn;
+      justify-content: center;
+      align-items: center;">
+      <img style="width:300px" src="http://img.xhfkindergarten.cn/default-bird.png" />
+    </div>
+    
+    <div style="display: flex;
+      flex-direction: cloumn;
       justify-content: center;
       align-items: center;">
       <h2>感谢注册XHFkindergarten的网站</h2>
