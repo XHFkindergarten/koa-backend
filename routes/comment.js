@@ -88,6 +88,12 @@ router.get('/getComment', async ctx => {
     ]
   })
   if (res) {
+    res.forEach(a => {
+      const time = new Date(a.time)
+      const minute = time.getMinutes()<10 ? '0'+time.getMinutes() : time.getMinutes()
+      a.time = `${time.getFullYear()}.${time.getMonth()+1}.${time.getDate()}
+        ${time.getHours()}:${minute}`
+    })
     ctx.status = 200
     ctx.body = {
       success: true,
@@ -158,6 +164,13 @@ router.get('/getReply', async ctx => {
     }
   })
   if (res) {
+    res.forEach(a => {
+      const time = new Date(a.time)
+      const minute = time.getMinutes()<10 ? '0'+time.getMinutes() : time.getMinutes()
+      a.time = `${time.getFullYear()}.${time.getMonth()+1}.${time.getDate()}
+        ${time.getHours()}:${minute}`
+    })
+    console.log(res)
     ctx.status = 200
     ctx.body = {
       success: true,
