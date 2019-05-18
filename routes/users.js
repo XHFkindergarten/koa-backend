@@ -82,7 +82,7 @@ router.post('/register', async ctx => {
     return 
   }
   const {name, email, password} = ctx.request.body
-  const avatar = `http://${config.host}/upload/avatar/default-avatar.png`
+  const avatar = `http://${config.imgHost}/default-avatar.png`
   // 将用户数据插入users表
   const res = await User.create({
     name,

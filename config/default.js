@@ -11,6 +11,9 @@ const prdHost = '35.241.100.176:3000'
 
 const host = process.env.NODE_ENV=='development'?devHost:prdHost
 
+// 七牛云服务器
+const imgHost = 'img.xhfkindergarten.cn'
+
 const code = '123'
 // 进行邮箱验证时的相关配置信息
 const emailInfo = (code) => {
@@ -42,5 +45,6 @@ module.exports = {
   database,
   secureOrKey,
   emailInfo,
-  host
+  host,
+  imgHost
 }
