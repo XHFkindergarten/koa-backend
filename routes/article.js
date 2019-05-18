@@ -162,7 +162,7 @@ router.post('/addArticle', passport.authenticate('jwt', {session:false}), async 
       content,
       createdAt: time,
       updatedAt: time,
-      labelImg: `http://${config.host}/upload/label/default_label_img.jpg`
+      labelImg: `http://${config.imgHost}/default_label_img.jpg`
     })
     if (res) {
       ctx.status = 200

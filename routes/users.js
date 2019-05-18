@@ -27,6 +27,8 @@ const fs = require('fs')
 const path = require('path')
 // 引入图形处理插件gm
 const gm = require('gm').subClass({imageMagick: true})
+// 引入七牛云插件
+const qiniu = require('qiniu')
 
 // 引入sequelize
 const sequelize = require('../mysql/sequelize')
@@ -118,6 +120,34 @@ router.post('/register', async ctx => {
       }
     }
     
+  }
+  ctx.status = 400
+})
+
+// 七牛云的公钥和私钥
+const accessKey = 'WFCJDsqbMl_VxaFpz4cyh2DUrH5bk_2C9YpICq_-';
+const secretKey = 'sNBjhBK3N1qt7_1V_qxnQ4G24St1dkhCdGjVFzGJ';
+// 存储空间名称
+const bucket = 'testsavezone';
+
+/**
+ * @router GET /users/getQnToken
+ */
+router.get('/getQnToken', async ctx => {
+  let mac = new qiniu.auth.digest.Mac(accessKey, secretKey);
+  let options = {
+    scope: bucket,
+    expires: 3600 * 24
+  };
+  let putPolicy =  new qiniu.rs.PutPolicy(options);
+  let uploadToken= putPolicy.uploadToken(mac);
+  if (uploadToken) {
+    ctx.status = 200
+    ctx.body = {
+      success: true,
+      token: uploadToken
+    }
+    return
   }
   ctx.status = 400
 })
