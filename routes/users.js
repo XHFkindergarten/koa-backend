@@ -132,6 +132,8 @@ const bucket = 'testsavezone';
 
 /**
  * @router GET /users/getQnToken
+ * @params accessKey
+ * @params secretKey
  */
 router.get('/getQnToken', async ctx => {
   let mac = new qiniu.auth.digest.Mac(accessKey, secretKey);
