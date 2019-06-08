@@ -90,7 +90,7 @@ router.post('/getWord', async ctx => {
           const key = new Date().getTime()
           const path = `./public/audio/${key}.mp3`
           fs.writeFileSync(path, res.data)
-          audioArr.push(`http://localhost:3000/audio/${key}.mp3`)
+          audioArr.push(`http://www.xhfkindergarten.cn:3000/audio/${key}.mp3`)
         } else {
           console.log('服务器错误')
         }
