@@ -81,21 +81,26 @@ router.post('/getWord', async ctx => {
   const size = Math.ceil(context1.length / limit)
   let context
   for (let i=0; i<size; i++) {
-    context = context1.substring(i*limit, i*limit + limit)
-    console.log(context.length)
-    console.log(context)
-    await client.text2audio(context, speechConfig).then( function(res) {
-      if (res.data) {
-        const key = new Date().getTime()
-        const path = `./public/audio/${key}.mp3`
-        fs.writeFileSync(path, res.data)
-        audioArr.push(`http://localhost:3000/audio/${key}.mp3`)
-      } else {
-        console.log('服务器错误')
-      }
-    }, function (e) {
-      console.log('网络发生错误')
-    })
+    try {
+      context = context1.substring(i*limit, i*limit + limit)
+      console.log(context.length)
+      console.log(context)
+      await client.text2audio(context, speechConfig).then( function(res) {
+        if (res.data) {
+          const key = new Date().getTime()
+          const path = `./public/audio/${key}.mp3`
+          fs.writeFileSync(path, res.data)
+          audioArr.push(`http://localhost:3000/audio/${key}.mp3`)
+        } else {
+          console.log('服务器错误')
+        }
+      }, function (e) {
+        console.log('网络发生错误')
+      })
+    } catch (e) {
+      console.log('转换错误')
+    }
+    
   }
   ctx.status = 200
   ctx.body = {
