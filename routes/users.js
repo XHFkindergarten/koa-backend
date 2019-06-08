@@ -125,10 +125,10 @@ router.post('/register', async ctx => {
 })
 
 // 七牛云的公钥和私钥
-const accessKey = 'WFCJDsqbMl_VxaFpz4cyh2DUrH5bk_2C9YpICq_-';
-const secretKey = 'sNBjhBK3N1qt7_1V_qxnQ4G24St1dkhCdGjVFzGJ';
+const accessKey = config.accessKey
+const secretKey = config.secretKey
 // 存储空间名称
-const bucket = 'testsavezone';
+const bucket = config.bucket
 
 /**
  * @router GET /users/getQnToken

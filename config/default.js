@@ -14,7 +14,14 @@ const host = process.env.NODE_ENV=='development'?devHost:prdHost
 // 七牛云服务器
 const imgHost = 'img.xhfkindergarten.cn'
 
-const code = '123'
+// 七牛云的公钥和私钥
+const accessKey = 'WFCJDsqbMl_VxaFpz4cyh2DUrH5bk_2C9YpICq_-'
+const secretKey = 'sNBjhBK3N1qt7_1V_qxnQ4G24St1dkhCdGjVFzGJ'
+// 存储空间名称
+const bucket = 'testsavezone'
+// 七牛云上传url
+const uploadUrl = 'http://up-z2.qiniup.com'
+
 // 进行邮箱验证时的相关配置信息
 const emailInfo = (code) => {
   const info = {
@@ -53,6 +60,12 @@ module.exports = {
   database,
   secureOrKey,
   emailInfo,
+  devHost,
+  prdHost,
   host,
-  imgHost
+  imgHost,
+  accessKey,
+  secretKey,
+  bucket,
+  uploadUrl
 }

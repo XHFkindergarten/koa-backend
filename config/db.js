@@ -2,7 +2,7 @@
 const database = {
   database:'koa',
   user:'root',
-  password:'excuse0602',
+  password:'12345678',
   port:'3306', // 一般可以直接使用默认值
   host:'localhost'
 }
