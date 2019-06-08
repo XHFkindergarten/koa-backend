@@ -62,7 +62,7 @@ router.post('/getWord', async ctx => {
 
     await pdf2text(file.path).then(pages => {
       pages.forEach(page => {
-        context1 += page.join(' ')
+        context1 += page.join('')
       })
     })
   } else {
