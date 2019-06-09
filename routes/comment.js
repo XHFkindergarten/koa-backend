@@ -89,10 +89,7 @@ router.get('/getComment', async ctx => {
   })
   if (res) {
     res.forEach(a => {
-      const time = new Date(a.time)
-      const minute = time.getMinutes()<10 ? '0'+time.getMinutes() : time.getMinutes()
-      a.time = `${time.getFullYear()}.${time.getMonth()+1}.${time.getDate()}
-        ${time.getHours()}:${minute}`
+      a.time = Utils.formatTime(a.time)
     })
     ctx.status = 200
     ctx.body = {
@@ -165,10 +162,7 @@ router.get('/getReply', async ctx => {
   })
   if (res) {
     res.forEach(a => {
-      const time = new Date(a.time)
-      const minute = time.getMinutes()<10 ? '0'+time.getMinutes() : time.getMinutes()
-      a.time = `${time.getFullYear()}.${time.getMonth()+1}.${time.getDate()}
-        ${time.getHours()}:${minute}`
+      a.time = Utils.formatTime(a.time)
     })
     console.log(res)
     ctx.status = 200
@@ -182,5 +176,45 @@ router.get('/getReply', async ctx => {
   ctx.status = 400
 })
 
+/**
+ * @router POST /comment/deleteComment
+ * @description 删除某一条评论
+ * @params commentId 评论id
+ * @access private
+ */
+router.post('/deleteComment', passport.authenticate('jwt', {session:false}), async ctx => {
+  const res = await sequelize.transaction(async t => {
+    console.log(ctx.request.body)
+    const {id, articleId} = ctx.request.body
+    const res1 = await Comment.destroy({
+      where: {
+        id
+      },
+      t
+    })
+    const res2 = await Reply.destroy({
+      where: {
+        commentId: id
+      },
+      t
+    })
+    const article = await Article.findOne({
+      where: {
+        id: articleId
+      },
+      t
+    })
+    const saveArticle = await article.update({
+      commentNum: article.commentNum - (res1 + res2)
+    }, t)
+    ctx.status = 200
+    ctx.body = {
+      success: true
+    }
+  }).catch(e => {
+    ctx.status = 400
+  })
+  
+})
 
 module.exports = router.routes()

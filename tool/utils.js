@@ -41,11 +41,20 @@ const timeValue = () => {
   return date.valueOf()
 }
 
+/**
+ * 根据int类型的时间返回 y-m-d h-m-s 格式的字符串
+ */
+const formatTime = (time) => {
+  const date = new Date(time)
+  return `${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()} ${date.getHours()}:${date.getMinutes()<10?'0'+date.getMinutes():date.getMinutes()}`
+}
+
 const utils = {
   enbcrypt,
   randCode,
   getFileType,
-  timeValue
+  timeValue,
+  formatTime
 }
 
 module.exports = utils
