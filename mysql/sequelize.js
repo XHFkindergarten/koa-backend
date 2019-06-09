@@ -5,6 +5,9 @@ const config = require('../config/default').database
 const sequelize = new Sequelize(config.database, config.user, config.password, {
   host: config.host,
   dialect: 'mysql',
+  // dialectOptions: {
+  //     socketPath: '/tmp/mysql.sock' // 指定套接字文件路径
+  // },
   pool: {
       max: 5,
       min: 0,

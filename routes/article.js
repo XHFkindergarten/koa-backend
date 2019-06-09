@@ -160,6 +160,7 @@ router.post('/addArticle', passport.authenticate('jwt', {session:false}), async 
       userId,
       groupId,
       content,
+      html: '<h1 style="text-align:center;">暂无内容</h1>',
       createdAt: time,
       updatedAt: time,
       labelImg: `http://${config.imgHost}/default_label_img.jpg`
@@ -217,7 +218,7 @@ router.get('/getArticleList', passport.authenticate('jwt', {session:false}), asy
  * @access private
  */
 router.post('/updateArticle', passport.authenticate('jwt', {session:false}), async ctx => {
-  console.log(ctx.request.body)
+  // console.log(ctx.request.body)
   const updateArt = await sequelize.transaction(async t => {
     // 文章id
     const id = ctx.request.body.id
@@ -233,14 +234,12 @@ router.post('/updateArticle', passport.authenticate('jwt', {session:false}), asy
       // 文章内容
       const content = ctx.request.body.content
       params.content = content
-
       // 获取文章的简介
       const reg1 = new RegExp("<.+?>","g")
       const reg2 = new RegExp("&.*;","g")
       let summary = content.replace(reg1, '')
       summary = summary.replace(reg2, '')
       summary = summary.substring(0,100) + '...'
-      params.summary = summary
     }
 
     if (ctx.request.body.title) {
@@ -254,7 +253,7 @@ router.post('/updateArticle', passport.authenticate('jwt', {session:false}), asy
 
     // 更新时间
     params.updatedAt = new Date().getTime()
-
+    console.log(params)
     const res = await article.update(params, {t})
     ctx.status = 200
     ctx.body = {
