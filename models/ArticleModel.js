@@ -41,7 +41,8 @@ const Article = sequelize.define('article', {
   viewTime: {
     field: 'view_time',
     type: Sequelize.INTEGER
-  }
+  },
+  tags: Sequelize.STRING(255)
 },{
   // 不要擅自添加时间戳属性
   timestamps: false,

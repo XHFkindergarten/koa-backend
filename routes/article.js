@@ -230,6 +230,7 @@ router.post('/updateArticle', passport.authenticate('jwt', {session:false}), asy
       t
     })
     const params = {}
+    params.tags = ctx.request.body.tags
     if (ctx.request.body.content) {
       // 文章内容
       const content = ctx.request.body.content
@@ -240,6 +241,7 @@ router.post('/updateArticle', passport.authenticate('jwt', {session:false}), asy
       let summary = content.replace(reg1, '')
       summary = summary.replace(reg2, '')
       summary = summary.substring(0,100) + '...'
+      params.summary = summary
     }
 
     if (ctx.request.body.title) {
