@@ -89,7 +89,7 @@ router.get('/getComment', async ctx => {
   })
   if (res) {
     res.forEach(a => {
-      a.time = Utils.formatTime(a.time)
+      a.time = Utils.formatTime(a.time + 8 * 60*60*1000)
     })
     ctx.status = 200
     ctx.body = {
