@@ -162,7 +162,7 @@ router.get('/getReply', async ctx => {
   })
   if (res) {
     res.forEach(a => {
-      a.time = Utils.formatTime(a.time)
+      a.time = Utils.formatTime(a.time + 8*60*60*1000)
     })
     console.log(res)
     ctx.status = 200
