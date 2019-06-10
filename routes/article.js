@@ -297,6 +297,9 @@ router.post('/deleteArticle', async ctx => {
  */
 router.get('/getAllArticle', async ctx => {
   const res = await Article.findAll({
+    where: {
+      isPublic: 1
+    },
     include: {
       model: User,
       as: 'userInfo'
@@ -467,6 +470,57 @@ router.get('/viewArticle', async ctx => {
     ctx.status = 400
   })
 })
+
+/**
+ * @router GET /article/publishArticle
+ * @description 将文章状态修改为发布
+ * @access private
+ */
+router.get('/publishArticle', passport.authenticate('jwt', {session:false}), async ctx => {
+  const id = ctx.query.id
+  const article = await Article.findOne({
+    where: {
+      id
+    }
+  })
+  const updateArt = await article.update({
+    isPublic: 1
+  })
+  if (updateArt) {
+    ctx.status = 200
+    ctx.body = {
+      success: true
+    }
+  } else {
+    ctx.status = 400
+  }
+})
+
+/**
+ * @router GET /article/unPublishArticle
+ * @description 将文章状态修改为未发布
+ * @access private
+ */
+router.get('/unPublishArticle', passport.authenticate('jwt', {session:false}), async ctx => {
+  const id = ctx.query.id
+  const article = await Article.findOne({
+    where: {
+      id
+    }
+  })
+  const updateArt = await article.update({
+    isPublic: 0
+  })
+  if (updateArt) {
+    ctx.status = 200
+    ctx.body = {
+      success: true
+    }
+  } else {
+    ctx.status = 400
+  }
+})
+
 
 
 module.exports = router.routes()

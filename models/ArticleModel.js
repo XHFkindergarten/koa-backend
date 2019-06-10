@@ -42,7 +42,11 @@ const Article = sequelize.define('article', {
     field: 'view_time',
     type: Sequelize.INTEGER
   },
-  tags: Sequelize.STRING(255)
+  tags: Sequelize.STRING(255),
+  isPublic: {
+    field: 'is_public',
+    type: Sequelize.INTEGER
+  }
 },{
   // 不要擅自添加时间戳属性
   timestamps: false,
