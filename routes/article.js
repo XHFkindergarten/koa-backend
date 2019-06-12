@@ -236,12 +236,16 @@ router.post('/updateArticle', passport.authenticate('jwt', {session:false}), asy
       const content = ctx.request.body.content
       params.content = content
       // 获取文章的简介
-      const reg1 = new RegExp("<.+?>","g")
-      const reg2 = new RegExp("&.*;","g")
-      let summary = content.replace(reg1, '')
-      summary = summary.replace(reg2, '')
-      summary = summary.substring(0,100) + '...'
-      params.summary = summary
+      // 创建中文正则符
+      let reg = /[\4e00-\u9fa5]/g
+      params.summary = params.content.catch(reg)
+
+      // const reg1 = new RegExp("<.+?>","g")
+      // const reg2 = new RegExp("&.*;","g")
+      // let summary = content.replace(reg1, '')
+      // summary = summary.replace(reg2, '')
+      // summary = summary.substring(0,100) + '...'
+      // params.summary = summary
     }
 
     if (ctx.request.body.title) {
