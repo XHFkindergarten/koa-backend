@@ -237,8 +237,8 @@ router.post('/updateArticle', passport.authenticate('jwt', {session:false}), asy
       params.content = content
       // 获取文章的简介
       // 创建中文正则符
-      let reg = /[\4e00-\u9fa5]/g
-      params.summary = params.content.catch(reg)
+      let reg = /[\u4e00-\u9fa5]/g
+      params.summary = params.content.match(reg).join('')
 
       // const reg1 = new RegExp("<.+?>","g")
       // const reg2 = new RegExp("&.*;","g")
