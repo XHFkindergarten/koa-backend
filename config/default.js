@@ -22,6 +22,9 @@ const bucket = 'testsavezone'
 // 七牛云上传url
 const uploadUrl = 'http://up-z2.qiniup.com'
 
+// 一次取出的动态数量
+const dailySize = 5
+
 // 进行邮箱验证时的相关配置信息
 const emailInfo = (code) => {
   const info = {
@@ -67,5 +70,6 @@ module.exports = {
   accessKey,
   secretKey,
   bucket,
-  uploadUrl
+  uploadUrl,
+  dailySize
 }

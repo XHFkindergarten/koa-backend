@@ -54,6 +54,9 @@ router.use('/comment', comment)
 // 引入extra路由
 const extra = require('./routes/extra')
 router.use('/extra', extra)
+// 引入daily路由
+const daily = require('./routes/daily')
+router.use('/daily', daily)
 
 
 // 将所有routes挂载在app上
