@@ -62,7 +62,10 @@ router.get('/getGroup',passport.authenticate('jwt', {session:false}),async ctx =
   const groups = await ArticleGroup.findAll({
     where: {
       userId
-    }
+    },
+    order: [
+      ['updatedAt', 'DESC']
+    ]
   })
   if (groups) {
     ctx.status = 200
@@ -218,10 +221,11 @@ router.get('/getArticleList', passport.authenticate('jwt', {session:false}), asy
  * @access private
  */
 router.post('/updateArticle', passport.authenticate('jwt', {session:false}), async ctx => {
-  // console.log(ctx.request.body)
   const updateArt = await sequelize.transaction(async t => {
     // 文章id
     const id = ctx.request.body.id
+    // 分组id
+    const groupId = ctx.request.body.groupId
     // 查找文章
     const article = await Article.findOne({
       where: {
@@ -231,15 +235,18 @@ router.post('/updateArticle', passport.authenticate('jwt', {session:false}), asy
     })
     const params = {}
     params.tags = ctx.request.body.tags
+    // 规范文章内容
     if (ctx.request.body.content) {
       // 文章内容
       const content = ctx.request.body.content
+      console.log('content:', content)
       params.content = content
       // 获取文章的简介
       // 创建中文正则符
       let reg = /[\u4e00-\u9fa5]/g
-      params.summary = params.content.match(reg).join('').substring(0,60) + '...'
-
+      if (params.content.match(reg)) {
+        params.summary = params.content.match(reg).join('').substring(0,60) + '...'
+      }
       // const reg1 = new RegExp("<.+?>","g")
       // const reg2 = new RegExp("&.*;","g")
       // let summary = content.replace(reg1, '')
@@ -247,20 +254,30 @@ router.post('/updateArticle', passport.authenticate('jwt', {session:false}), asy
       // summary = summary.substring(0,100) + '...'
       // params.summary = summary
     }
-
+    // 文章标题
     if (ctx.request.body.title) {
       // 标题
       params.title = ctx.request.body.title
     }
-
+    // 标签图
     if (ctx.request.body.labelImg) {
       params.labelImg = ctx.request.body.labelImg
     }
-
     // 更新时间
     params.updatedAt = new Date().getTime()
-    console.log(params)
     const res = await article.update(params, {t})
+
+    // 更新这个分组的updatedAt
+    const group = await ArticleGroup.findOne({
+      where: {
+        id: groupId
+      },
+      t
+    })
+    const updateGroup = await group.update({
+      updatedAt: new Date().getTime()
+    },t)
+
     ctx.status = 200
     ctx.body = {
       success: true,
