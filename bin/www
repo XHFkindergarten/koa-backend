@@ -6,9 +6,20 @@
 
 var app = require('../app');
 var debug = require('debug')('demo:server');
-var http = require('http');
+var http = require('http')
+var https = require('https')
+const fs = require('fs')
 
-
+/**
+ * 引入SSL处理
+ */
+// http请求会被强制转换http请求
+const enforceHttps = require('koa-sslify').default
+app.use(enforceHttps())
+var options = {
+  key: fs.readFileSync('/usr/local/nginx/sbin/nginx/ssl/xhf.key'),  //ssl文件路径
+  cert: fs.readFileSync('/usr/local/nginx/sbin/nginx/ssl/xhf.pem')  //ssl文件路径
+};
 
 
 /**
