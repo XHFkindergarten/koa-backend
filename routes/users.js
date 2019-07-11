@@ -84,7 +84,7 @@ router.post('/register', async ctx => {
     return 
   }
   const {name, email, password} = ctx.request.body
-  const avatar = `http://${config.imgHost}/default-avatar.png`
+  const avatar = `https://${config.imgHost}/default-avatar.png`
   // 将用户数据插入users表
   const res = await User.create({
     name,
@@ -208,7 +208,7 @@ router.post('/uploadImg', async ctx => {
   ctx.body = {
     success: true,
     msg: 'congratuations,upload avatarImg success!',
-    imgpath: `http://${config.host}/upload/${ctx.request.body.type}/${uniqueKey}.${Utils.getFileType(file.type)}`
+    imgpath: `https://${config.host}/upload/${ctx.request.body.type}/${uniqueKey}.${Utils.getFileType(file.type)}`
   }
   
 })

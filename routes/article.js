@@ -169,7 +169,7 @@ router.post('/addArticle', passport.authenticate('jwt', {session:false}), async 
       html: '<h1 style="text-align:center;">暂无内容</h1>',
       createdAt: time,
       updatedAt: time,
-      labelImg: `http://${config.imgHost}/default_label_img.jpg`
+      labelImg: `https://${config.imgHost}/default_label_img.jpg`
     })
     if (res) {
       ctx.status = 200

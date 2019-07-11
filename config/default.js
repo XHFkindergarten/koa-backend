@@ -20,7 +20,7 @@ const secretKey = 'sNBjhBK3N1qt7_1V_qxnQ4G24St1dkhCdGjVFzGJ'
 // 存储空间名称
 const bucket = 'testsavezone'
 // 七牛云上传url
-const uploadUrl = 'http://up-z2.qiniup.com'
+const uploadUrl = 'https://up-z2.qiniup.com'
 
 // 一次取出的动态数量
 const dailySize = 5
