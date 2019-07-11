@@ -38,7 +38,7 @@ const emailInfo = (code) => {
       flex-direction: cloumn;
       justify-content: center;
       align-items: center;">
-      <img style="width:300px" src="http://img.xhfkindergarten.cn/default-bird.png" />
+      <img style="width:300px" src="https://img.xhfkindergarten.cn/default-bird.png" />
     </div>
     
     <div style="display: flex;
