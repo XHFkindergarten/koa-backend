@@ -25,6 +25,9 @@ const uploadUrl = 'http://up-z2.qiniup.com'
 // 一次取出的动态数量
 const dailySize = 5
 
+// 标签的组合字符
+const tagGap = 'gapline'
+
 // 进行邮箱验证时的相关配置信息
 const emailInfo = (code) => {
   const info = {
@@ -71,5 +74,6 @@ module.exports = {
   secretKey,
   bucket,
   uploadUrl,
-  dailySize
+  dailySize,
+  tagGap
 }

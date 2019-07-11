@@ -22,6 +22,9 @@ const User = require('../models/UserModel')
 const Like = require('../models/LikeModel')
 // 引入sequelize
 const sequelize = require('../mysql/sequelize')
+// 引入sequelize操作符
+const Op = require('sequelize').Op
+
 
 
 /**
@@ -234,7 +237,9 @@ router.post('/updateArticle', passport.authenticate('jwt', {session:false}), asy
       t
     })
     const params = {}
-    params.tags = ctx.request.body.tags
+    if (ctx.request.body.tags) {
+      params.tags = ctx.request.body.tags
+    }
     // 规范文章内容
     if (ctx.request.body.content) {
       // 文章内容
@@ -265,18 +270,21 @@ router.post('/updateArticle', passport.authenticate('jwt', {session:false}), asy
     }
     // 更新时间
     params.updatedAt = new Date().getTime()
-    const res = await article.update(params, {t})
-
-    // 更新这个分组的updatedAt
-    const group = await ArticleGroup.findOne({
-      where: {
-        id: groupId
-      },
-      t
-    })
-    const updateGroup = await group.update({
-      updatedAt: new Date().getTime()
-    },t)
+    console.log(params)
+    const res = await article.update(params, t)
+    if (params.content) {
+      // 更新这个分组的updatedAt
+      const group = await ArticleGroup.findOne({
+        where: {
+          id: groupId
+        },
+        t
+      })
+      const updateGroup = await group.update({
+        updatedAt: new Date().getTime()
+      },t)
+    }
+    
 
     ctx.status = 200
     ctx.body = {
@@ -540,6 +548,55 @@ router.get('/unPublishArticle', passport.authenticate('jwt', {session:false}), a
   } else {
     ctx.status = 400
   }
+})
+
+/**
+ * @router GET /article/getRecommend
+ * @description 获取该标签的其他文章推荐
+ * @access public
+ */
+router.get('/getRecommend', async ctx => {
+  // 获取标签名和这个文章名
+  const {tag, id} = ctx.query
+  let arts = await Article.findAll({
+    where: {
+      id: {
+        [Op.ne]: id
+      },
+      tags: {
+        [Op.like]: '%' + tag + '%'
+      },
+      isPublic: 1
+    },
+    attributes: [
+      'id',
+      'title',
+      'updated_at',
+      'like_num',
+      'view_time',
+      'tags',
+      'comment_num'
+    ],
+    include: {
+      model: User,
+      as: 'userInfo'
+    }
+  })
+  if (arts.length > 0) {
+    // 将用户正在读的文章删除
+    ctx.status = 200
+    ctx.body = {
+      success: true,
+      arts
+    }
+  } else {
+    ctx.status = 200
+    ctx.body = {
+      success: false,
+      msg: 'no available articles...'
+    }
+  }
+
 })
 
 
