@@ -11,3 +11,5 @@ koa2 project-name
 2、登录
 3、token验证
 # koa-backend
+
+配合个人网站www.xhfkindergarten.cn实现了一些功能
