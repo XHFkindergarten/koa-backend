@@ -7,9 +7,15 @@ const database = require('./db')
 
 const devHost = 'localhost:3000'
 
-const prdHost = '35.241.100.176:3000'
+const prdHost = '34.92.157.70:3000'
 
 const host = process.env.NODE_ENV=='development'?devHost:prdHost
+
+const devSslUrl='/Users/mac/repository/ssl'
+
+const prdSslUrl='/usr/local/nginx/sbin/nginx/ssl'
+
+const sslUrl = process.env.NODE_ENV=='development'?devSslUrl:prdSslUrl
 
 // 七牛云服务器
 const imgHost = 'img.xhfkindergarten.cn'
@@ -75,5 +81,6 @@ module.exports = {
   bucket,
   uploadUrl,
   dailySize,
-  tagGap
+  tagGap,
+  sslUrl
 }
