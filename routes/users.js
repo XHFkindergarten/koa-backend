@@ -3,14 +3,12 @@ const Router = require('koa-router');
 const router = new Router()
 // 引入配置
 const config = require('../config/default')
-// 引入数据库
-const Mysql = require('../mysql/index')
+
 // 引入注册信息表单验证方法
 const ValidateRegister = require('../validation/register')
 // 引入登录信息表单验证方法
 const ValidateLogin = require('../validation/login')
-// 引入sql语句生成方法
-const SQL = require('../mysql/sql')
+
 // 引用工具方法
 const Utils = require('../tool/utils')
 // 引入加密和解密工具
@@ -38,6 +36,10 @@ const User = require('../models/UserModel')
 const Role = require('../models/RoleModel')
 // 引入文章分组 Model
 const ArticleGroup = require('../models/ArticleGroupModel')
+// 引入mysql实例
+const Mysql = require('../mysql')
+// 引入SQL语句生成器
+const SQL = require('../mysql/sql')
 
 /**
  * @router GET /users defaultAPI
