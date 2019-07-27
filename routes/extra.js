@@ -37,38 +37,41 @@ const client = new AipSpeechClient(APP_ID, API_KEY, SECRET_KEY)
  * @access private
  */
 router.post('/getWord', async ctx => {
-  console.log(ctx.request.body)
-  let {spd, per, vol} = ctx.request.body
+  let {spd, per, vol, words} = ctx.request.body
   spd = parseInt(spd)
   per = parseInt(per)
   vol = parseInt(vol)
-  // 获取七牛token
-  let mac = new qiniu.auth.digest.Mac(accessKey, secretKey);
-  let options = {
-    scope: bucket,
-    expires: 3600 * 24
-  };
-  let putPolicy =  new qiniu.rs.PutPolicy(options);
-  let uploadToken= putPolicy.uploadToken(mac);
-  console.log(uploadToken)
 
-  // 获取file
-  const {file} = ctx.request.files
-  console.log(file)
+  // // 获取七牛token
+  // let mac = new qiniu.auth.digest.Mac(accessKey, secretKey);
+  // let options = {
+  //   scope: bucket,
+  //   expires: 3600 * 24
+  // };
+  // let putPolicy =  new qiniu.rs.PutPolicy(options);
+  // let uploadToken= putPolicy.uploadToken(mac);
+
+  
   let context1 = ''
-  if (file.type === 'application/pdf') {
-    console.log('PDF文件')
-    console.log(file.path)
-
-    await pdf2text(file.path).then(pages => {
-      pages.forEach(page => {
-        context1 += page.join('')
-      })
-    })
+  if (words) {
+    context1 = words
   } else {
-    const result = await mammoth.extractRawText({path: file.path})
-    console.log('文本长度', result.value.length)
-    context1 = result.value
+    // 获取file
+    const {file} = ctx.request.files
+    if (file.type === 'application/pdf') {
+      console.log('PDF文件')
+      console.log(file.path)
+  
+      await pdf2text(file.path).then(pages => {
+        pages.forEach(page => {
+          context1 += page.join('')
+        })
+      })
+    } else {
+      const result = await mammoth.extractRawText({path: file.path})
+      console.log('文本长度', result.value.length)
+      context1 = result.value
+    }
   }
   const speechConfig = {
     spd: spd || 5, // 速度0-10
