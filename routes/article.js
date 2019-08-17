@@ -330,6 +330,9 @@ router.get('/getAllArticle', async ctx => {
     where: {
       isPublic: 1
     },
+    attributes: [
+      'id','userId','groupId','summary','title','createdAt','updatedAt','likeNum','commentNum','viewTime','tags','isPublic'
+    ],
     include: {
       model: User,
       as: 'userInfo'
