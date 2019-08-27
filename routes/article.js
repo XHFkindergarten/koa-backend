@@ -190,12 +190,18 @@ router.post('/addArticle', passport.authenticate('jwt', {session:false}), async 
  * @access private
  */
 router.get('/getArticleList', passport.authenticate('jwt', {session:false}), async ctx => {
+  console.log(ctx.query.userId)
   const articles = await Article.findAll({
-    where: ctx.query,
+    where: {
+      userId: ctx.query.userId
+    },
     include: {
       model: User,
       as: 'userInfo'
     },
+    attributes: [
+      'id','title','groupId'
+    ],
     // 根据更新时间降序查找，最新评论在上面
     order: [
       ['updated_at', 'DESC']
