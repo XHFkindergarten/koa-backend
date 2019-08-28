@@ -200,7 +200,7 @@ router.get('/getArticleList', passport.authenticate('jwt', {session:false}), asy
       as: 'userInfo'
     },
     attributes: [
-      'id','title','groupId'
+      'id','title','groupId','likeNum','commentNum','viewTime'
     ],
     // 根据更新时间降序查找，最新评论在上面
     order: [
