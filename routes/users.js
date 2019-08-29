@@ -308,7 +308,7 @@ router.post('/login', async ctx => {
     }
     // 生成token字符串
     const token = jwt.sign(payLoad,config.secureOrKey,{
-      expiresIn: 24*60*60 // token有效时间
+      expiresIn: 24*3*60*60 // token有效时间3天
     })
     ctx.status = 200
     ctx.body = {
