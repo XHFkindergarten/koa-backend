@@ -341,7 +341,8 @@ router.get('/current', passport.authenticate('jwt', {session:false}),
       username: ctx.state.user.name,
       avatar: ctx.state.user.avatar,
       mood: ctx.state.user.mood,
-      sign: ctx.state.user.sign
+      sign: ctx.state.user.sign,
+      notice: ctx.state.user.dailyNotice
     }
 })
 
@@ -443,6 +444,30 @@ router.get('/getOneUser', async ctx => {
     return
   }
   ctx.status = 400
+})
+
+/**
+ * @router GET /users/clearNotice
+ * @description 默认看过了所有消息
+ * @access private
+ */
+router.get('/clearNotice', passport.authenticate('jwt', {session:false}), async ctx => {
+  const id = ctx.query.id
+  const user = await User.findOne({
+    where: {
+      id
+    }
+  })
+  if (user) {
+    const res = await user.update({
+      dailyNotice: 0
+    })
+    if (res) {
+      ctx.body = {
+        success: true
+      }
+    }
+  }
 })
 
 

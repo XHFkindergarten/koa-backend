@@ -12,6 +12,10 @@ const User = sequelize.define('users', {
   password: Sequelize.STRING(255),
   mood: Sequelize.STRING(255),
   sign: Sequelize.STRING(255),
+  dailyNotice: {
+    type: Sequelize.INTEGER,
+    field: 'daily_notice'
+  }
 },{
   // 不要擅自添加时间戳属性
   timestamps: false,

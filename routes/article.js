@@ -276,7 +276,6 @@ router.post('/updateArticle', passport.authenticate('jwt', {session:false}), asy
     }
     // 更新时间
     params.updatedAt = new Date().getTime()
-    console.log(params)
     const res = await article.update(params, t)
     if (params.content) {
       // 更新这个分组的updatedAt

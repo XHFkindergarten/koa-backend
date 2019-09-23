@@ -3,6 +3,7 @@ const router = require('koa-router')()
 const passport = require('koa-passport')
 const Daily = require('../models/DailyModel')
 const User = require('../models/UserModel')
+const DailyComment = require('../models/DailyCommentModel')
 const Utils = require('../tool/utils')
 const config = require('../config/default')
 
@@ -94,6 +95,137 @@ router.get('/deleteOne', passport.authenticate('jwt', {session:false}), async ct
     ctx.status = 200
     ctx.body = {
       success: true
+    }
+  }
+})
+
+/**
+ * @router POST /daily/comment
+ * @description 发表评论
+ * @access private
+ */
+router.post('/comment', passport.authenticate('jwt', {session:false}), async ctx => {
+  const {dailyId, content, userId, replyTo} = ctx.request.body
+  // 如果没有评论内容
+  if (!content) {
+    ctx.body = {
+      success: false,
+      msg: 'empty content'
+    }
+    return
+  }
+  const daily = await Daily.findOne({
+    where: {
+      id: dailyId
+    }
+  })
+  // 如果没有这条动态
+  if (!daily) {
+    ctx.body = {
+      success: false,
+      msg: 'daily doesnt exist'
+    }
+    return
+  }
+  // 为用户发送提醒
+  let user
+  if (!replyTo) {
+    user = await User.findOne({
+      where: {
+        id: daily.userId
+      }
+    })
+  } else {
+    user = await User.findOne({
+      where: {
+        id: replyTo
+      }
+    })
+  }
+  // 增加提醒数目
+  await user.update({
+    dailyNotice: user.dailyNotice+1
+  })
+  var params = {
+    commentAt: new Date().getTime(),
+    dailyId,
+    content, 
+    userId,
+    replyTo: !replyTo?0:replyTo
+  }
+  console.log(params)
+  const createComment = DailyComment.create(params)
+  if (createComment) {
+    ctx.status = 200
+    ctx.body = {
+      msg: 'create daily comment success',
+      success: true
+    }
+  }
+})
+/**
+ * @router GET /daily/getComment
+ * @description 获取某条动态的全部评论
+ * @access public
+ */
+router.get('/getComment', async ctx => {
+  const id = ctx.query.id
+  const comments = await DailyComment.findAll({
+    where: {
+      dailyId: id,
+      delete: 1
+    },
+    include: [
+      {
+        model: User,
+        as: 'userInfo',
+        attributes: ['name']
+      },{
+        model: User,
+        as: 'reply',
+        attributes: ['name']
+      }
+    ],
+    // 根据更新时间降序查找，最新动态在上面
+    order: [
+      ['commentAt', 'DESC']
+    ],
+  })
+  if (comments.length > 0) {
+    ctx.body = {
+      success: true,
+      comments
+    }
+  } else {
+    ctx.body = {
+      success: false,
+      msg: 'no comment'
+    }
+  }
+})
+
+/**
+ * @router GET /daily/deleteComment
+ * @description 删除一条评论
+ * @access private
+ */
+router.get('/deleteComment', passport.authenticate('jwt', {session:false}),async ctx => {
+  const id = ctx.query.id
+  console.log(id)
+  const comment = await DailyComment.findOne({
+    where: {
+      id
+    }
+  })
+  console.log(comment)
+  if (comment) {
+    const deleteComment = await comment.update({
+      delete: 0
+    })
+    if (deleteComment) {
+      ctx.body = {
+        success: true
+      }
     }
   }
 })

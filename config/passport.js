@@ -8,9 +8,7 @@ opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken(); // 获取请求�
 opts.secretOrKey = key; // token的key值
 
 // 引入sql相关组件
-const Mysql = require('../mysql/index')
-const mysql = new Mysql()
-const SQL = require('../mysql/sql')
+const User = require('../models/UserModel')
 
 module.exports = passport=>{
   // 在passport组件中注册jwt策略
@@ -18,14 +16,15 @@ module.exports = passport=>{
       new JwtStrategy(opts, async function(jwt_payload, done) {
       // 此时的jwt_payload是token被解析后得到的信息
       // console.log(jwt_payload)
-      const user = await mysql.query(SQL.query({
-        tableName: 'users',
-        params: {
+      const user = await User.findOne({
+        where: {
           id: jwt_payload.id
         }
-      }))
-      if(user.length>0) {
-        return done(null,user[0])
+      })
+      console.log("id:"+jwt_payload.id)
+      console.log(user)
+      if(user) {
+        return done(null,user)
       } else {
         return done(null,false)
       }
