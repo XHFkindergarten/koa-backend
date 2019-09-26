@@ -253,17 +253,13 @@ router.post('/updateArticle', passport.authenticate('jwt', {session:false}), asy
       console.log('content:', content)
       params.content = content
       // 获取文章的简介
-      // 创建中文正则符
-      let reg = /[\u4e00-\u9fa5]/g
-      if (params.content.match(reg)) {
-        params.summary = params.content.match(reg).join('').substring(0,60) + '...'
-      }
-      // const reg1 = new RegExp("<.+?>","g")
-      // const reg2 = new RegExp("&.*;","g")
-      // let summary = content.replace(reg1, '')
-      // summary = summary.replace(reg2, '')
-      // summary = summary.substring(0,100) + '...'
-      // params.summary = summary
+      // // 创建中文正则符
+      // let reg = /[\u4e00-\u9fa5]/g
+      // if (params.content.match(reg)) {
+      //   params.summary = params.content.match(reg).join('').substring(0,60) + '...'
+      // }
+      let reg = /\>|```|\/[a-z]|#|\s|\[\S*\]|\(\S*\)|\*/g
+      params.summary = params.content.replace(reg, '').substring(0, 80)+'...'
     }
     // 文章标题
     if (ctx.request.body.title) {
