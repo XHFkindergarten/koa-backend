@@ -42,7 +42,7 @@
     "pug": "^2.0.0-rc.1",
     "qiniu": "^7.2.1",
     "qn": "^1.3.0",
-    "sequelize": "^5.8.5",
+    "sequelize": "^5.15.1",
     "validator": "^10.11.0"
   },
   "devDependencies": {
