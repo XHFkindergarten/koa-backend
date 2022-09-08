@@ -32,7 +32,7 @@
     "koa-static": "^3.0.0",
     "koa-views": "^5.2.1",
     "lodash": "^4.17.11",
-    "mammoth": "^1.4.8",
+    "mammoth": "^1.5.1",
     "mysql": "^2.16.0",
     "mysql2": "^1.6.5",
     "node-mysql": "^0.4.2",
